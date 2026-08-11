@@ -27,6 +27,12 @@ describe('weighted selection',()=>{
   expect(parseConfig(legacy)[0]).toMatchObject({weight:1,options:[{weight:1}]});
   for(const weight of [0,-1,'nope']) expect(()=>parseConfig(JSON.stringify([{id:'g',label:'Group',weight,options:[]}]))).toThrow(/Weights/);
  });
+ it('loads terminology metadata and gives legacy configurations neutral nouns',async()=>{
+  const {parseConfiguration}=await import('./model');
+  const group={id:'g',label:'Group',options:[]};
+  expect(parseConfiguration(JSON.stringify({metadata:{groupNoun:'category',optionNoun:'meal'},groups:[group]})).metadata).toEqual({groupNoun:'category',optionNoun:'meal'});
+  expect(parseConfiguration(JSON.stringify([group])).metadata).toEqual({groupNoun:'group',optionNoun:'option'});
+ });
  it('places weighted segment centers on their statistical ranges',async()=>{
   const {weightedSegments,alignedWeightedRotation}=await import('./model');
   expect(weightedSegments([{weight:1},{weight:3}])).toEqual([{start:0,end:90,center:45},{start:90,end:360,center:225}]);

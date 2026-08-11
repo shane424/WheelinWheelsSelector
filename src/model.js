@@ -1,6 +1,8 @@
 export const STORAGE_KEY = 'wheelin-config-v1';
 export const HISTORY_STORAGE_KEY = 'wheelin-history-v1';
 export const HISTORY_LIMIT = 30;
+export const DEFAULT_TERMINOLOGY = Object.freeze({ groupNoun: 'group', optionNoun: 'option' });
+export const SEEDED_TERMINOLOGY = Object.freeze({ groupNoun: 'person', optionNoun: 'game' });
 const makeOptions = (owner, color, labels) => labels.map((label, i) => ({ id: `${owner}-${i}`, label, color, weight: 1 }));
 export const DEFAULT_GROUPS = [
   { id: 'shane', label: 'Shane', color: '#ff6b6b', weight: 1, options: makeOptions('shane', '#ff6b6b', ['Rocket League', 'Fortnite', 'Minecraft', 'Overwatch 2']) },
@@ -9,6 +11,11 @@ export const DEFAULT_GROUPS = [
   { id: 'hutch', label: 'Hutch', color: '#f7c948', weight: 1, options: makeOptions('hutch', '#f7c948', ['Grand Theft Auto V', 'Halo Infinite', 'Party Animals', 'Golf With Your Friends']) },
 ];
 export const cloneDefaults = () => structuredClone(DEFAULT_GROUPS);
+export const normalizeTerminology = metadata => ({
+  groupNoun: String(metadata?.groupNoun ?? DEFAULT_TERMINOLOGY.groupNoun).trim() || DEFAULT_TERMINOLOGY.groupNoun,
+  optionNoun: String(metadata?.optionNoun ?? DEFAULT_TERMINOLOGY.optionNoun).trim() || DEFAULT_TERMINOLOGY.optionNoun,
+});
+export const cloneDefaultConfig = () => ({ metadata: { ...SEEDED_TERMINOLOGY }, groups: cloneDefaults() });
 export function secureIndex(length, cryptoObject = globalThis.crypto) {
   if (!Number.isInteger(length) || length < 1) return null;
   if (!cryptoObject?.getRandomValues) return Math.floor(Math.random() * length);
@@ -62,9 +69,17 @@ export const optionsForGroup = (groups, id) => groups.find(g => g.id === id)?.op
 export const configState = groups => !Array.isArray(groups) ? 'invalid' : !groups.length ? 'empty' : groups.some(g => !g?.id || !String(g.label).trim() || !Array.isArray(g.options) || (g.weight !== undefined && !validWeight(g.weight)) || g.options.some(option => !option?.id || !String(option.label).trim() || (option.weight !== undefined && !validWeight(option.weight)))) ? 'invalid' : 'ready';
 export const normalizeConfig = groups => groups.map(group => ({ ...group, weight: group.weight ?? 1, options: group.options.map(option => ({ ...option, weight: option.weight ?? 1 })) }));
 export function parseConfig(text) {
+  return parseConfiguration(text).groups;
+}
+export function normalizeConfiguration(value) {
+  const groups = Array.isArray(value) ? value : value?.groups;
+  return { metadata: normalizeTerminology(Array.isArray(value) ? undefined : value?.metadata), groups: normalizeConfig(groups) };
+}
+export function parseConfiguration(text) {
   const value = JSON.parse(text);
-  if (configState(value) === 'invalid') throw new Error('Groups and options need labels. Weights must be finite numbers greater than zero.');
-  return normalizeConfig(value);
+  const groups = Array.isArray(value) ? value : value?.groups;
+  if (configState(groups) === 'invalid') throw new Error('Groups and options need labels. Weights must be finite numbers greater than zero.');
+  return normalizeConfiguration(value);
 }
 
 export const isHistoryRecord = record => record !== null
