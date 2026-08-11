@@ -1,5 +1,18 @@
-import { describe,expect,it,vi } from 'vitest';import{alignedRotation,configState,optionsForGroup,secureIndex,selectableGroups}from'./model';
+import { describe,expect,it,vi } from 'vitest';import{alignedRotation,configState,DEFAULT_GROUPS,optionsForGroup,secureIndex,selectableGroups,STORAGE_KEY}from'./model';
 describe('selection model',()=>{
+ it('provides the corrected default game lists under a new storage schema',()=>{
+  expect(STORAGE_KEY).toBe('wheelin-config-v2');
+  expect(Object.fromEntries(DEFAULT_GROUPS.map(group=>[group.id,group.options.map(option=>option.label)]))).toEqual({
+   shane:['Battleship','Sorry','Bingo','Dungeon Draft','Sun Tzu'],
+   alex:['Backgammon','Roulette','Drillers','Dominant Species','Wingspan'],
+   jason:['Risk','Candy Land','Civolution','Beast','Fort','Entropy'],
+   hutch:['Mega Spell Wars','Small World','Magic: The Gathering','The Witcher'],
+  });
+  for(const group of DEFAULT_GROUPS) {
+   expect(group.weight).toBe(1);
+   group.options.forEach((option,index)=>expect(option).toMatchObject({id:`${group.id}-${index}`,color:group.color,weight:1}));
+  }
+ });
  it('returns null for empty and a valid selection bound otherwise',()=>{expect(secureIndex(0)).toBeNull();for(let i=0;i<40;i++)expect(secureIndex(4)).toBeGreaterThanOrEqual(0),expect(secureIndex(4)).toBeLessThan(4)});
  it('maps a group only to its own options',()=>expect(optionsForGroup([{id:'a',options:[1]},{id:'b',options:[2]}],'b')).toEqual([2]));
  it('handles empty and single option inputs',()=>{expect(optionsForGroup([],'x')).toEqual([]);expect(secureIndex(1)).toBe(0);expect(configState([])).toBe('empty')});
