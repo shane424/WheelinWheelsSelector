@@ -1,5 +1,7 @@
 # Wheelin' Wheels Selector
 
+[![CI](https://github.com/shane424/WheelinWheelsSelector/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/shane424/WheelinWheelsSelector/actions/workflows/ci.yml)
+
 A product-neutral, local-first decision maker for games, meals, chores, activities, or any options you can name. The currently interactive default experience uses a sequential group wheel followed by an option wheel, so the second result always belongs to the group selected by the first.
 
 ## Setup
