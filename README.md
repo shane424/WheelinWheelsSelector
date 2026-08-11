@@ -23,20 +23,33 @@ The labels are examples, not a restriction: rename groups to households, meal ty
 
 ## Spin modes
 
-The gallery documents ten ways the same group/option model can be used:
+The gallery documents a broader catalog of choice-making formats. Sequential wheels remain the implemented default: pick a group, then one of that group's options. Linked wheels and nested wheels are shown as equal-odds formats, while the rest of the catalog demonstrates mechanics that can map option weights to higher probability.
 
-1. **Sequential wheels** (implemented default): group, then one of that group's options.
-2. **Linked wheels**: both wheels move together.
-3. **Nested wheels**: an inner and outer wheel.
-4. **Giant wheel**: flattened group/option combinations.
-5. **Tournament**: bracket elimination.
-6. **Slot reels**: independently stopping reels.
-7. **Cascading**: multi-level decision trees.
-8. **Group playoffs**: one option per group followed by a group final.
-9. **Knockout spins**: repeatedly remove selected entries.
-10. **Ranked pointers**: several pointers generate a ranked shortlist.
+Each mode card includes a short description, a **Uses weights** or **Equal odds** badge, the way weights affect probability, and an example use case. The gallery is visual and animated; sequential mode is the fully interactive chooser.
 
-The gallery is visual and animated; sequential mode is the fully interactive chooser.
+## Weighted choice mechanics
+
+Weights increase the number of paths, spaces, copies, or target area assigned to an option. A weight of 3 should generally be represented as about three times as many winning chances as a weight of 1, though the exact expression depends on the mechanic:
+
+| Mechanic | How weights map to probability |
+| --- | --- |
+| **Plinko board** | Heavier options receive larger bottom bins or repeated bins, so more puck paths finish there. |
+| **Skee-ball target board** | Heavier options get bigger rings, wider pockets, or easier landing areas. |
+| **Pachinko/peg board** | Bucket widths or repeated buckets increase the number of peg-board paths assigned to heavier options. |
+| **Marble race** | Weights become lane advantages, more shortcuts, or repeated marbles racing for the same option. |
+| **Dice table** | Larger ranges of dice totals are mapped to heavier options. |
+| **Card draw** | Higher-weight options get duplicate cards in the deck. |
+| **Bag draw/raffle tickets** | Higher-weight options get more tickets or slips in the bag. |
+| **Spinner with weighted slices** | Segment size is proportional to option weight, matching the wheel metaphor with larger slices. |
+| **Weighted bracket seeding** | Higher weights receive byes, easier matchups, or multiple bracket entries. |
+| **Token drop/carnival coin pusher** | Wider scoring trays are assigned to heavier options. |
+| **Prize claw/grab bag** | More copies of weighted options are placed in the prize pool. |
+| **Slot-machine reels** | Heavier options are repeated more often on each reel. |
+| **Dart board/target toss** | Larger target zones are assigned to heavier options. |
+| **Random walk/map path** | More map branches lead to weighted outcomes, increasing the chance a walk reaches them. |
+| **Bingo/tumbler balls** | More balls are labeled for heavier options. |
+
+The current interactive selector still resolves equal-odds sequential wheels; these weighted mechanics describe future-friendly display formats for configurations that include weights.
 
 ## Editing and local storage
 
@@ -74,4 +87,4 @@ The wheel derives equal segment angles from any positive option count. The selec
 
 ## Tests
 
-`npm test` covers secure selection bounds, group/option mapping, empty and single inputs, deterministic alignment, validation states, sequential and linked interactions, configuration editing, keyboard activation, reduced motion, and local persistence. Weighted selection is intentionally not supported: each option has an equal chance.
+`npm test` covers secure selection bounds, group/option mapping, empty and single inputs, deterministic alignment, validation states, sequential and linked interactions, configuration editing, keyboard activation, reduced motion, and local persistence. The implemented chooser currently gives each available option an equal chance; weighted mechanics are documented as catalog formats for future weighted configurations.
