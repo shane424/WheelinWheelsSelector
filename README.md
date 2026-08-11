@@ -1,6 +1,6 @@
 # Wheelin' Wheels Selector
 
-A product-neutral, local-first decision maker for games, meals, chores, activities, or any options you can name. The default experience uses a group wheel followed by an option wheel, so the second result always belongs to the group selected by the first.
+A product-neutral, local-first decision maker for games, meals, chores, activities, or any options you can name. The currently interactive default experience uses a sequential group wheel followed by an option wheel, so the second result always belongs to the group selected by the first.
 
 ## Setup
 
@@ -23,20 +23,28 @@ The labels are examples, not a restriction: rename groups to households, meal ty
 
 ## Spin modes
 
-The gallery documents ten ways the same group/option model can be used:
+The gallery documents how the same group/option data model could support additional choice-making formats beyond the playable default:
 
-1. **Sequential wheels** (implemented default): group, then one of that group's options.
-2. **Linked wheels**: both wheels move together.
-3. **Nested wheels**: an inner and outer wheel.
-4. **Giant wheel**: flattened group/option combinations.
-5. **Tournament**: bracket elimination.
-6. **Slot reels**: independently stopping reels.
-7. **Cascading**: multi-level decision trees.
-8. **Group playoffs**: one option per group followed by a group final.
-9. **Knockout spins**: repeatedly remove selected entries.
-10. **Ranked pointers**: several pointers generate a ranked shortlist.
+1. **Sequential wheels** (`implemented`, **Playable now**): group, then one of that group's options.
+2. **Linked wheels** (`planned`, **Playable now**): one control starts the group spin and then automatically spins options from the selected group, so simultaneous behavior is partially implemented through **Spin both**.
+3. **Nested wheels** (`concept`, **Concept**): an inner and outer wheel.
+4. **Giant wheel** (`concept`, **Concept**, **Uses weights**): flattened group/option combinations.
+5. **Tournament** (`concept`, **Concept**, **Uses weights**): bracket elimination.
+6. **Slot reels** (`concept`, **Concept**): independently stopping reels.
+7. **Cascading** (`concept`, **Concept**): multi-level decision trees.
+8. **Group playoffs** (`concept`, **Concept**, **Uses weights**): one option per group followed by a group final.
+9. **Knockout spins** (`concept`, **Concept**): repeatedly remove selected entries.
+10. **Ranked pointers** (`concept`, **Concept**, **Uses weights**): several pointers generate a ranked shortlist.
+11. **Plinko board** (`concept`, **Concept**, **Uses weights**): a puck drops through pins into weighted outcome slots.
+12. **Skee-ball** (`concept`, **Concept**, **Uses weights**): rolls land in targets mapped to choices or point tiers.
+13. **Pachinko** (`concept`, **Concept**, **Uses weights**): a ball bounces through pegs into choice pockets.
+14. **Marble race** (`concept`, **Concept**): lanes decide by the first finisher.
+15. **Dice table** (`concept`, **Concept**, **Uses weights**): dice totals or custom faces map to choices.
+16. **Card draw** (`concept`, **Concept**, **Uses weights**): a shuffled deck provides group and option cards.
+17. **Raffle** (`concept`, **Concept**, **Uses weights**): tickets are drawn from an entry pool.
+18. **Dart board** (`concept`, **Concept**, **Uses weights**): target regions represent available choices.
 
-The gallery is visual and animated; sequential mode is the fully interactive chooser.
+The gallery is visual and animated; sequential mode is the fully interactive chooser today. Weight badges describe formats where future versions could give entries unequal representation, but current wheel selection remains equal-chance.
 
 ## Editing and local storage
 
@@ -74,4 +82,4 @@ The wheel derives equal segment angles from any positive option count. The selec
 
 ## Tests
 
-`npm test` covers secure selection bounds, group/option mapping, empty and single inputs, deterministic alignment, validation states, sequential and linked interactions, configuration editing, keyboard activation, reduced motion, and local persistence. Weighted selection is intentionally not supported: each option has an equal chance.
+`npm test` covers secure selection bounds, group/option mapping, empty and single inputs, deterministic alignment, validation states, sequential and linked interactions, configuration editing, keyboard activation, reduced motion, and local persistence. Weighted selection is intentionally not supported in the interactive chooser: each option has an equal chance.
