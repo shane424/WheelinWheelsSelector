@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Editor } from './Editor'; import { Modes } from './Modes';
-import { cloneDefaults, configState, STORAGE_KEY } from './model';
-function load(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||cloneDefaults()}catch{return cloneDefaults()}}
+import { cloneDefaults, configState, normalizeConfig, STORAGE_KEY } from './model';
+function load(){try{const saved=JSON.parse(localStorage.getItem(STORAGE_KEY));return saved?normalizeConfig(saved):cloneDefaults()}catch{return cloneDefaults()}}
 export default function App(){
  const [groups,setGroups]=useState(load); const [history,setHistory]=useState([]); const state=configState(groups);
  const reducedMotion=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches??false;

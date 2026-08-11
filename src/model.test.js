@@ -7,3 +7,29 @@ describe('selection model',()=>{
  it('aligns a chosen segment center at the fixed pointer',()=>{const angle=alignedRotation(27,2,5,5);expect(angle).toBeGreaterThan(1800);expect(((angle+(2.5*72))%360+360)%360).toBeCloseTo(0)});
  it('uses supplied crypto randomness deterministically',()=>{const crypto={getRandomValues:vi.fn(a=>{a[0]=7;return a})};expect(secureIndex(3,crypto)).toBe(1)});
 });
+
+describe('weighted selection',()=>{
+ const cryptoAt=value=>({getRandomValues(array){array[0]=value;return array}});
+ it('uses cumulative boundaries with injected secure random values',async()=>{
+  const {secureWeightedIndex}=await import('./model');
+  expect(secureWeightedIndex([1,3],cryptoAt(0))).toBe(0);
+  expect(secureWeightedIndex([1,3],cryptoAt(0x3fffffff))).toBe(0);
+  expect(secureWeightedIndex([1,3],cryptoAt(0x40000000))).toBe(1);
+  expect(secureWeightedIndex([1,3],cryptoAt(0xffffffff))).toBe(1);
+ });
+ it('rejects invalid weights and totals',async()=>{
+  const {secureWeightedIndex}=await import('./model');
+  for(const weights of [[0],[-1],['1'],[NaN],[Infinity],[Number.MAX_VALUE,Number.MAX_VALUE]]) expect(secureWeightedIndex(weights,cryptoAt(0))).toBeNull();
+ });
+ it('normalizes legacy imports and rejects invalid imported weights',async()=>{
+  const {parseConfig}=await import('./model');
+  const legacy='[{"id":"g","label":"Group","options":[{"id":"o","label":"Option"}]}]';
+  expect(parseConfig(legacy)[0]).toMatchObject({weight:1,options:[{weight:1}]});
+  for(const weight of [0,-1,'nope']) expect(()=>parseConfig(JSON.stringify([{id:'g',label:'Group',weight,options:[]}]))).toThrow(/Weights/);
+ });
+ it('places weighted segment centers on their statistical ranges',async()=>{
+  const {weightedSegments,alignedWeightedRotation}=await import('./model');
+  expect(weightedSegments([{weight:1},{weight:3}])).toEqual([{start:0,end:90,center:45},{start:90,end:360,center:225}]);
+  expect((alignedWeightedRotation(0,[{weight:1},{weight:3}],1,0)+225)%360).toBe(0);
+ });
+});

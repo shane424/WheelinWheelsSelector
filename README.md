@@ -44,7 +44,7 @@ The gallery documents how the same group/option data model could support additio
 17. **Raffle** (`concept`, **Concept**, **Uses weights**): tickets are drawn from an entry pool.
 18. **Dart board** (`concept`, **Concept**, **Uses weights**): target regions represent available choices.
 
-The gallery is visual and animated; sequential mode is the fully interactive chooser today. Weight badges describe formats where future versions could give entries unequal representation, but current wheel selection remains equal-chance.
+Every playable mode honors configured weights. Wheel segment areas also represent relative weights, with a text legend so even very small segments remain legible.
 
 ## Editing and local storage
 
@@ -58,18 +58,19 @@ The import/export format is an array of group objects. IDs should be unique stri
     "id": "dinner",
     "label": "Dinner",
     "color": "#ff6b6b",
+    "weight": 2,
     "options": [
-      { "id": "dinner-tacos", "label": "Tacos", "color": "#ff6b6b" }
+      { "id": "dinner-tacos", "label": "Tacos", "color": "#ff6b6b", "weight": 1 }
     ]
   }
 ]
 ```
 
-Malformed JSON, missing group IDs or labels, and missing option arrays are reported as invalid rather than replacing the current configuration. Empty group lists and groups with no options have explicit empty states.
+The optional numeric `weight` field must be finite and greater than zero. Higher values increase relative probability: an entry weighted 2 is twice as likely as one weighted 1. Files and saved configurations without weights remain compatible and load with weight 1. Malformed JSON, missing group or option IDs or labels, invalid weights, and missing option arrays are reported as invalid rather than replacing the current configuration. Empty group lists and groups with no options have explicit empty states.
 
 ## Selection and animation
 
-The wheel derives equal segment angles from any positive option count. The selected index is obtained before animation with `crypto.getRandomValues` and unbiased rejection sampling when the Web Crypto API exists, with `Math.random` as a compatibility fallback. Animation then adds multiple rotations and aligns the selected segment's center with the fixed top pointer; it never changes the result. An active wheel rejects duplicate spins. A single option works normally, while an empty wheel is disabled.
+The wheel derives segment angles from each entry's share of the total weight. The selected index is obtained before animation by mapping a uniformly distributed 32-bit value from `crypto.getRandomValues` onto cumulative weight boundaries, with `Math.random` as a compatibility fallback. Animation then adds multiple rotations and aligns the selected segment's center with the fixed top pointer; it never changes the result. An active wheel rejects duplicate spins. A single option works normally, while an empty wheel is disabled.
 
 ## Accessibility
 
@@ -82,4 +83,4 @@ The wheel derives equal segment angles from any positive option count. The selec
 
 ## Tests
 
-`npm test` covers secure selection bounds, group/option mapping, empty and single inputs, deterministic alignment, validation states, sequential and linked interactions, configuration editing, keyboard activation, reduced motion, and local persistence. Weighted selection is intentionally not supported in the interactive chooser: each option has an equal chance.
+`npm test` covers secure selection bounds, group/option mapping, empty and single inputs, deterministic alignment, validation states, sequential and linked interactions, configuration editing, keyboard activation, reduced motion, and local persistence. Tests also cover weighted statistical boundaries, deterministic injected random values, invalid weights, and backward-compatible imports.

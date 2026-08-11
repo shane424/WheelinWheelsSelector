@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Wheel } from './Wheel';
 import { cascade, groupPlayoffs, historyRecord, knockout, pairsFromGroups, takeRandom, tournament } from './selection';
-import { secureIndex } from './model';
+import { secureWeightedIndex } from './model';
 
 export const MODE_METADATA = [
   { id:'sequential', icon:'① → ②', name:'Sequential wheels', description:'Pick a group, then an option from only that group.', kind:'sequential' },
@@ -57,8 +57,8 @@ function Mechanic({ mode, groups, pairs, onResult, reducedMotion, disabled }) {
     else if(mode.kind==='cascade'){
       const tree=groups.map(g=>({...g,children:g.options?.map(o=>({...o,group:g,option:o}))})); const path=cascade(tree); candidate=path.at(-1); selections=path.map(x=>x.label);
     } else if(mode.kind==='slots'){
-      const group=groups.filter(g=>g.options?.length)[secureIndex(groups.filter(g=>g.options?.length).length)]; const option=group.options[secureIndex(group.options.length)]; candidate={id:`${group.id}:${option.id}`,label:`${group.label} · ${option.label}`,group,option}; selections=[group.label,option.label];
-    } else {candidate=pairs[secureIndex(pairs.length)];selections=[candidate.label];}
+      const group=groups.filter(g=>g.options?.length)[secureWeightedIndex(groups.filter(g=>g.options?.length))]; const option=group.options[secureWeightedIndex(group.options)]; candidate={id:`${group.id}:${option.id}`,label:`${group.label} · ${option.label}`,group,option}; selections=[group.label,option.label];
+    } else {candidate=pairs[secureWeightedIndex(pairs)];selections=[candidate.label];}
     const value=historyRecord(mode.id,candidate,{selections});
     setPlaying(true); setDisplay(selections); // outcome is fixed before visual animation begins
     clearTimeout(timer.current); timer.current=setTimeout(()=>{setRecord(value);setPlaying(false);onResult(value)},reducedMotion?0:700);
@@ -86,5 +86,5 @@ export function Modes({ groups, onResult, reducedMotion=false, disabled=false })
   const [activeId,setActiveId]=useState('sequential'); const active=MODE_METADATA.find(m=>m.id===activeId)??MODE_METADATA[0];
   const activate=id=>{setActiveId(id);setTimeout(()=>document.querySelector('#chooser')?.scrollIntoView?.({behavior:reducedMotion?'auto':'smooth'}),0)};
   return <><section id="chooser" className="chooser panel" aria-labelledby="chooser-title"><div className="section-heading"><div><span className="eyebrow">ACTIVE MODE · {active.name.toUpperCase()}</span><h2 id="chooser-title">{active.name}</h2><p className="muted">{active.description}</p></div>{active.id!=='sequential'&&<button className="outline" onClick={()=>setActiveId('sequential')}>Return to default</button>}</div><SelectionMode key={active.id} mode={active} {...{groups,onResult,reducedMotion,disabled}}/></section>
-  <section className="modes" aria-labelledby="modes-title"><span className="eyebrow">WAYS TO DECIDE</span><h2 id="modes-title">Spin modes</h2><p className="muted">Every format uses the same configured choices and equal random selection.</p><div className="mode-grid">{MODE_METADATA.map((m,i)=><article className={`mode-card ${m.id===active.id?'active':''}`} key={m.id}><div className={`mode-demo demo-${i}`} aria-hidden="true"><span>{m.icon}</span></div><div><h3>{m.name} {m.id==='sequential'&&<em>DEFAULT</em>}</h3><p>{m.description}</p><button className="text-button" onClick={()=>activate(m.id)} aria-pressed={m.id===active.id}>Try this mode</button></div></article>)}</div></section></>;
+  <section className="modes" aria-labelledby="modes-title"><span className="eyebrow">WAYS TO DECIDE</span><h2 id="modes-title">Spin modes</h2><p className="muted">Every format uses the same configured choices and honors their relative weights.</p><div className="mode-grid">{MODE_METADATA.map((m,i)=><article className={`mode-card ${m.id===active.id?'active':''}`} key={m.id}><div className={`mode-demo demo-${i}`} aria-hidden="true"><span>{m.icon}</span></div><div><h3>{m.name} {m.id==='sequential'&&<em>DEFAULT</em>}</h3><p>{m.description}</p><button className="text-button" onClick={()=>activate(m.id)} aria-pressed={m.id===active.id}>Try this mode</button></div></article>)}</div></section></>;
 }
