@@ -50,10 +50,12 @@ Every playable mode honors configured weights. Wheel segment areas also represen
 
 The editor can add, rename, recolor, reorder, or delete any group and option. Changes save automatically to the browser's `localStorage` under `wheelin-config-v1`; selection history uses the separately versioned `wheelin-history-v1` key. **Reset defaults** restores the bundled example. **Export JSON** downloads the current configuration; **Import JSON** validates and loads one.
 
-The import/export format is an array of group objects. IDs should be unique strings and labels preserve their exact spelling:
+The import/export format includes configuration metadata and an array of group objects. Singular nouns default to `group` and `option` for legacy configurations; the bundled games example uses `person` and `game`. IDs should be unique strings and labels preserve their exact spelling:
 
 ```json
-[
+{
+  "metadata": { "groupNoun": "category", "optionNoun": "meal" },
+  "groups": [
   {
     "id": "dinner",
     "label": "Dinner",
@@ -63,10 +65,11 @@ The import/export format is an array of group objects. IDs should be unique stri
       { "id": "dinner-tacos", "label": "Tacos", "color": "#ff6b6b", "weight": 1 }
     ]
   }
-]
+  ]
+}
 ```
 
-The optional numeric `weight` field must be finite and greater than zero. Higher values increase relative probability: an entry weighted 2 is twice as likely as one weighted 1. Files and saved configurations without weights remain compatible and load with weight 1. Malformed JSON, missing group or option IDs or labels, invalid weights, and missing option arrays are reported as invalid rather than replacing the current configuration. Empty group lists and groups with no options have explicit empty states.
+The editor exposes both singular labels, and uses them for spin controls, stage instructions, and accessible wheel names. The optional numeric `weight` field must be finite and greater than zero. Higher values increase relative probability: an entry weighted 2 is twice as likely as one weighted 1. Files and saved configurations without weights remain compatible and load with weight 1. Malformed JSON, missing group or option IDs or labels, invalid weights, and missing option arrays are reported as invalid rather than replacing the current configuration. Empty group lists and groups with no options have explicit empty states.
 
 ## Selection and animation
 
