@@ -7,26 +7,31 @@ const title = value => value.charAt(0).toUpperCase()+value.slice(1);
 
 export const MODE_METADATA = [
   { id:'sequential', icon:'① → ②', name:'Sequential wheels', description:'Pick a group, then an option from only that group.', kind:'sequential', status:'implemented' },
-  { id:'linked', icon:'◎ ◎', name:'Linked wheels', description:'One control runs an automatic two-stage spin: group first, then an option from that group.', kind:'slots', status:'implemented' },
-  { id:'nested', icon:'◉', name:'Nested wheels', description:'Independently rotating inner and outer rings reveal a paired choice.', kind:'nested', status:'planned' },
-  { id:'giant', icon:'✹', name:'Giant wheel', description:'Every group-and-option pairing on one wheel.', kind:'wheel', status:'concept' },
-  { id:'tournament', icon:'🏆', name:'Tournament', description:'Choices compete through a generated elimination bracket.', kind:'tournament', status:'concept' },
-  { id:'slots', icon:'▥', name:'Slot reels', description:'Group and its related option reels stop in sequence.', kind:'slots', status:'concept' },
-  { id:'cascading', icon:'⌄⌄⌄', name:'Cascading choices', description:'Make a choice at each level of an arbitrary decision tree.', kind:'cascade', status:'concept' },
-  { id:'playoffs', icon:'◌ ◌ ◉', name:'Group playoffs', description:'Select one option from every group, then select the winning group.', kind:'playoffs', status:'concept' },
-  { id:'knockout', icon:'✕ ◯', name:'Knockout', description:'Remove one randomly selected candidate per round until one remains.', kind:'knockout', status:'concept' },
-  { id:'ranked', icon:'Ⅰ Ⅱ Ⅲ', name:'Ranked pointers', description:'Sample a unique ranked shortlist without replacement.', kind:'ranked', status:'concept' },
-  { id:'plinko', icon:'⫶', name:'Plinko', description:'Drop a puck through pins into an outcome slot.', kind:'motion', status:'concept' },
-  { id:'skeeball', icon:'⛳', name:'Skee-ball', description:'Roll toward a target mapped to a configured choice.', kind:'motion', status:'concept' },
-  { id:'pachinko', icon:'◍', name:'Pachinko', description:'Bounce a ball through pegs into a choice pocket.', kind:'motion', status:'concept' },
-  { id:'marbles', icon:'● ↘', name:'Marble racing', description:'Race the configured choices to a selected winner.', kind:'motion', status:'concept' },
-  { id:'dice', icon:'⚂', name:'Dice', description:'Roll a fair custom face mapped to each configured choice.', kind:'alternate', status:'concept' },
-  { id:'cards', icon:'🂠', name:'Cards', description:'Draw from a shuffled deck of the configured choices.', kind:'alternate', status:'concept' },
-  { id:'raffle', icon:'🎟', name:'Raffle', description:'Pull one ticket from the configured choices.', kind:'alternate', status:'concept' },
-  { id:'darts', icon:'◎', name:'Darts', description:'Throw at equal target regions representing available choices.', kind:'motion', status:'concept' },
+  { id:'linked', icon:'◎ ◎', name:'Linked wheels', description:'One control runs an automatic two-stage spin: group first, then an option from that group.', kind:'slots', status:'preview' },
+  { id:'nested', icon:'◉', name:'Nested wheels', description:'Independently rotating inner and outer rings reveal a paired choice.', kind:'nested', status:'implemented' },
+  { id:'giant', icon:'✹', name:'Giant wheel', description:'Every group-and-option pairing on one wheel.', kind:'wheel', status:'implemented' },
+  { id:'tournament', icon:'🏆', name:'Tournament', description:'Choices compete through a generated elimination bracket.', kind:'tournament', status:'preview' },
+  { id:'slots', icon:'▥', name:'Slot reels', description:'Group and its related option reels stop in sequence.', kind:'slots', status:'preview' },
+  { id:'cascading', icon:'⌄⌄⌄', name:'Cascading choices', description:'Make a choice at each level of an arbitrary decision tree.', kind:'cascade', status:'preview' },
+  { id:'playoffs', icon:'◌ ◌ ◉', name:'Group playoffs', description:'Select one option from every group, then select the winning group.', kind:'playoffs', status:'preview' },
+  { id:'knockout', icon:'✕ ◯', name:'Knockout', description:'Remove one randomly selected candidate per round until one remains.', kind:'knockout', status:'preview' },
+  { id:'ranked', icon:'Ⅰ Ⅱ Ⅲ', name:'Ranked pointers', description:'Sample a unique ranked shortlist without replacement.', kind:'ranked', status:'preview' },
+  { id:'plinko', icon:'⫶', name:'Plinko', description:'Drop a puck through pins into an outcome slot.', kind:'motion', status:'preview' },
+  { id:'skeeball', icon:'⛳', name:'Skee-ball', description:'Roll toward a target mapped to a configured choice.', kind:'motion', status:'preview' },
+  { id:'pachinko', icon:'◍', name:'Pachinko', description:'Bounce a ball through pegs into a choice pocket.', kind:'motion', status:'preview' },
+  { id:'marbles', icon:'● ↘', name:'Marble racing', description:'Race the configured choices to a selected winner.', kind:'motion', status:'preview' },
+  { id:'dice', icon:'⚂', name:'Dice', description:'Roll a fair custom face mapped to each configured choice.', kind:'alternate', status:'preview' },
+  { id:'cards', icon:'🂠', name:'Cards', description:'Draw from a shuffled deck of the configured choices.', kind:'alternate', status:'preview' },
+  { id:'raffle', icon:'🎟', name:'Raffle', description:'Pull one ticket from the configured choices.', kind:'alternate', status:'preview' },
+  { id:'darts', icon:'◎', name:'Darts', description:'Throw at equal target regions representing available choices.', kind:'motion', status:'preview' },
 ];
 
-export const STATUS_LABELS = { implemented:'Playable', planned:'Preview', concept:'Concept' };
+export const STATUS_LABELS = { implemented:'Implemented', preview:'Interactive preview', concept:'Concept' };
+export const STATUS_MEANINGS = {
+  implemented:'Complete interactive mechanic that simulates the named mode.',
+  preview:'Interactive simplified visualization that selects a result without fully simulating the named mechanic.',
+  concept:'Noninteractive design card only.',
+};
 
 function Result({ record }) {
   return <div className={`result-card ${record ? 'show' : ''}`} aria-live="polite">
@@ -54,6 +59,10 @@ function Giant({ pairs, onResult, reducedMotion, disabled, mode }) {
   return <><Wheel items={pairs} label={`${mode.name} wheel`} disabled={disabled} reducedMotion={reducedMotion} onSelect={item=>{const value=historyRecord(mode.id,item);setRecord(value);onResult(value)}}/><Result record={record}/></>;
 }
 
+function Concept({ mode }) {
+  return <div className="notice"><p><strong>{mode.name}</strong> is a noninteractive design concept.</p></div>;
+}
+
 function Mechanic({ mode, groups, pairs, onResult, reducedMotion, disabled }) {
   const [record,setRecord]=useState(null); const [display,setDisplay]=useState([]); const [playing,setPlaying]=useState(false); const timer=useRef();
   useEffect(()=>()=>clearTimeout(timer.current),[]);
@@ -74,7 +83,7 @@ function Mechanic({ mode, groups, pairs, onResult, reducedMotion, disabled }) {
     clearTimeout(timer.current); timer.current=setTimeout(()=>{setRecord(value);setPlaying(false);onResult(value)},reducedMotion?0:700);
   };
   const glyph=mode.id==='dice'?'⚄':mode.id==='cards'?'🂠':mode.id==='raffle'?'🎟':mode.icon;
-  return <><div className={`mechanic mechanic-${mode.kind} ${playing?'playing':''}`} data-testid={`${mode.id}-visual`} aria-hidden="true"><strong>{glyph}</strong><div>{display.map((x,i)=><span key={`${x}-${i}`}>{x}</span>)}</div></div><div className="spin-controls"><button className="primary" onClick={play} disabled={disabled||playing||!pairs.length}>Play {mode.name}</button></div><Result record={record}/></>;
+  return <><div className={`mechanic mechanic-${mode.kind} ${playing?'playing':''}`} data-testid={`${mode.id}-visual`} aria-hidden="true"><strong>{glyph}</strong><div>{display.map((x,i)=><span key={`${x}-${i}`}>{x}</span>)}</div></div><div className="spin-controls"><button className="primary" onClick={play} disabled={disabled||playing||!pairs.length}>{mode.status==='preview'?`Run ${mode.name} preview`:`Play ${mode.name}`}</button></div><Result record={record}/></>;
 }
 
 function Nested({ groups, pairs, onResult, reducedMotion, disabled, mode }) {
@@ -89,6 +98,7 @@ export function SelectionMode({ mode, groups, onResult, reducedMotion=false, dis
   const eligibleGroups=useMemo(()=>selectableGroups(groups),[groups]);
   const pairs=useMemo(()=>pairsFromGroups(eligibleGroups),[eligibleGroups]);
   const selectionDisabled=disabled||!eligibleGroups.length;
+  if(mode.status==='concept')return <Concept mode={mode}/>;
   if(mode.id==='sequential')return <Sequential groups={eligibleGroups} {...{onResult,reducedMotion,terminology}} disabled={selectionDisabled}/>;
   if(mode.kind==='wheel')return <Giant {...{pairs,onResult,reducedMotion,mode}} disabled={selectionDisabled}/>;
   if(mode.kind==='nested')return <Nested groups={eligibleGroups} {...{pairs,onResult,reducedMotion,mode}} disabled={selectionDisabled}/>;
@@ -100,5 +110,5 @@ export function Modes({ groups, onResult, reducedMotion=false, disabled=false, t
   const nouns=normalizeTerminology(terminology);
   const activate=id=>{setActiveId(id);setTimeout(()=>document.querySelector('#chooser')?.scrollIntoView?.({behavior:reducedMotion?'auto':'smooth'}),0)};
   return <><section id="chooser" className="chooser panel" aria-labelledby="chooser-title"><div className="section-heading"><div><span className="eyebrow">ACTIVE MODE · {active.name.toUpperCase()}</span><h2 id="chooser-title">{active.name}</h2><p className="muted">{active.id==='sequential'?`Pick the ${nouns.groupNoun}, then the ${nouns.optionNoun} from only that ${nouns.groupNoun}.`:active.description}</p></div>{active.id!=='sequential'&&<button className="outline" onClick={()=>setActiveId('sequential')}>Return to default</button>}</div><SelectionMode key={active.id} mode={active} {...{groups,onResult,reducedMotion,disabled,terminology:nouns}}/></section>
-  <section className="modes" aria-labelledby="modes-title"><span className="eyebrow">WAYS TO DECIDE</span><h2 id="modes-title">Spin modes</h2><p className="muted">Every format uses the same configured choices and honors their relative weights.</p><div className="mode-grid">{MODE_METADATA.map((m,i)=><article className={`mode-card ${m.id===active.id?'active':''}`} key={m.id}><div className={`mode-demo demo-${i}`} aria-hidden="true"><span>{m.icon}</span></div><div><h3>{m.name} {m.id==='sequential'&&<em>DEFAULT</em>}</h3><div className="mode-badges"><span className={`mode-badge ${m.status??'concept'}`}>{STATUS_LABELS[m.status??'concept']}</span></div><p>{m.description}</p><button className="text-button" onClick={()=>activate(m.id)} aria-pressed={m.id===active.id}>Try this mode</button></div></article>)}</div></section></>;
+  <section className="modes" aria-labelledby="modes-title"><span className="eyebrow">WAYS TO DECIDE</span><h2 id="modes-title">Spin modes</h2><p className="muted">Every format uses the same configured choices and honors their relative weights.</p><div className="mode-grid">{MODE_METADATA.map((m,i)=><article className={`mode-card ${m.id===active.id?'active':''}`} key={m.id}><div className={`mode-demo demo-${i}`} aria-hidden="true"><span>{m.icon}</span></div><div><h3>{m.name} {m.id==='sequential'&&<em>DEFAULT</em>}</h3><div className="mode-badges"><span className={`mode-badge ${m.status??'concept'}`}>{STATUS_LABELS[m.status??'concept']}</span></div><p>{m.description}</p>{m.status!=='concept'&&<button className="text-button" onClick={()=>activate(m.id)} aria-pressed={m.id===active.id}>{m.status==='preview'?'Try interactive preview':'Play this mode'}</button>}</div></article>)}</div></section></>;
 }
