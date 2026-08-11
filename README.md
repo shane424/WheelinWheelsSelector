@@ -23,28 +23,36 @@ The labels are examples, not a restriction: rename groups to households, meal ty
 
 ## Spin modes
 
-The gallery documents how the same group/option data model could support additional choice-making formats beyond the playable default:
+Mode status has one of three explicit meanings:
 
-1. **Sequential wheels** (`implemented`, **Playable**): group, then one of that group's options.
-2. **Linked wheels** (`implemented`, **Playable**): one control runs an automatic two-stage spin: it selects the group first and then spins only that group's options.
-3. **Nested wheels** (`planned`, **Preview**): an inner and outer wheel.
-4. **Giant wheel** (`concept`, **Concept**, **Uses weights**): flattened group/option combinations.
-5. **Tournament** (`concept`, **Concept**, **Uses weights**): bracket elimination.
-6. **Slot reels** (`concept`, **Concept**): independently stopping reels.
-7. **Cascading** (`concept`, **Concept**): multi-level decision trees.
-8. **Group playoffs** (`concept`, **Concept**, **Uses weights**): one option per group followed by a group final.
-9. **Knockout spins** (`concept`, **Concept**): repeatedly remove selected entries.
-10. **Ranked pointers** (`concept`, **Concept**, **Uses weights**): several pointers generate a ranked shortlist.
-11. **Plinko board** (`concept`, **Concept**, **Uses weights**): a puck drops through pins into weighted outcome slots.
-12. **Skee-ball** (`concept`, **Concept**, **Uses weights**): rolls land in targets mapped to choices or point tiers.
-13. **Pachinko** (`concept`, **Concept**, **Uses weights**): a ball bounces through pegs into choice pockets.
-14. **Marble race** (`concept`, **Concept**): lanes decide by the first finisher.
-15. **Dice table** (`concept`, **Concept**, **Uses weights**): dice totals or custom faces map to choices.
-16. **Card draw** (`concept`, **Concept**, **Uses weights**): a shuffled deck provides group and option cards.
-17. **Raffle** (`concept`, **Concept**, **Uses weights**): tickets are drawn from an entry pool.
-18. **Dart board** (`concept`, **Concept**, **Uses weights**): target regions represent available choices.
+- **Implemented** (`implemented`) means a complete, interactive mechanic that simulates the named format.
+- **Interactive preview** (`preview`) means a simplified interactive visualization that chooses a valid result, but does not yet fully simulate the named mechanic.
+- **Concept** (`concept`) is reserved for a noninteractive design card with no play action.
 
-Every playable mode honors configured weights. Wheel segment areas also represent relative weights, with a text legend so even very small segments remain legible.
+The source currently contains three specialized, implemented mechanics: the sequential two-wheel flow, nested rings, and a giant flattened wheel. All other entries use the generic preview component, which preselects a result using the format's selection routine and then animates a glyph and selection summary. No current entry is concept-only.
+
+| Mode | Source status | Rendered behavior |
+| --- | --- | --- |
+| Sequential wheels | Implemented | Specialized two-stage wheel: spin a group, then an option belonging to it; **Spin both** chains the stages. |
+| Linked wheels | Interactive preview | Generic preview preselects a related group and option and displays them in sequence; it does not render or spin two linked wheels. |
+| Nested wheels | Implemented | Specialized outer and inner wheel mechanic; the group result populates and starts the option ring. |
+| Giant wheel | Implemented | Specialized wheel containing every eligible group/option pair. |
+| Tournament | Interactive preview | Generic preview computes bracket winners and summarizes each round; no bracket is rendered. |
+| Slot reels | Interactive preview | Generic preview selects a related group and option and lists both; no reels are simulated. |
+| Cascading choices | Interactive preview | Generic preview samples the available group-to-option path; it is not an arbitrary interactive decision tree. |
+| Group playoffs | Interactive preview | Generic preview samples one finalist per group and a winner, then summarizes the finalists; no playoff interface is rendered. |
+| Knockout | Interactive preview | Generic preview computes eliminations and shows their labels; it does not play rounds interactively. |
+| Ranked pointers | Interactive preview | Generic preview samples up to three unique choices and lists their rank order; no pointers are rendered. |
+| Plinko | Interactive preview | Generic preview preselects a choice and animates the mode glyph; there are no pins or puck physics. |
+| Skee-ball | Interactive preview | Generic preview preselects a choice and animates the mode glyph; there is no roll or target simulation. |
+| Pachinko | Interactive preview | Generic preview preselects a choice and animates the mode glyph; there are no peg or ball physics. |
+| Marble racing | Interactive preview | Generic preview preselects a choice and animates the mode glyph; no race is simulated. |
+| Dice | Interactive preview | Generic preview preselects a choice and animates a die glyph; it does not map or roll custom faces. |
+| Cards | Interactive preview | Generic preview preselects a choice and animates a card glyph; it does not simulate a shuffled deck. |
+| Raffle | Interactive preview | Generic preview preselects a choice and animates a ticket glyph; it does not simulate a ticket pool. |
+| Darts | Interactive preview | Generic preview preselects a choice and animates the mode glyph; no board regions or throw are simulated. |
+
+Interactive selections honor configured relative weights. Wheel segment areas also represent relative weights, with a text legend so even very small segments remain legible.
 
 ## Editing and local storage
 
