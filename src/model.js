@@ -14,6 +14,17 @@ export function secureIndex(length, cryptoObject = globalThis.crypto) {
   do cryptoObject.getRandomValues(value); while (value[0] >= limit);
   return value[0] % length;
 }
+export const optionWeight = item => Math.max(0, Math.floor(Number(item?.weight ?? 1) || 0));
+export const weightedIndex = (items, randomIndex = secureIndex) => {
+  const total = items.reduce((sum, item) => sum + optionWeight(item), 0);
+  if (total < 1) return null;
+  let ticket = randomIndex(total);
+  for (let i = 0; i < items.length; i += 1) {
+    ticket -= optionWeight(items[i]);
+    if (ticket < 0) return i;
+  }
+  return null;
+};
 export const segmentCenter = (index, count) => count ? (index + .5) * (360 / count) : 0;
 export const alignedRotation = (current, index, count, turns = 5) => {
   if (!count) return current;

@@ -51,13 +51,16 @@ The import/export format is an array of group objects. IDs should be unique stri
     "label": "Dinner",
     "color": "#ff6b6b",
     "options": [
-      { "id": "dinner-tacos", "label": "Tacos", "color": "#ff6b6b" }
+      { "id": "dinner-tacos", "label": "Tacos", "color": "#ff6b6b", "weight": 3 },
+      { "id": "dinner-salad", "label": "Salad", "color": "#4dd4ac", "weight": 0 }
     ]
   }
 ]
 ```
 
 Malformed JSON, missing group IDs or labels, and missing option arrays are reported as invalid rather than replacing the current configuration. Empty group lists and groups with no options have explicit empty states.
+
+`weight` is optional and defaults to `1` when it is missing. A weight of `0` keeps an entry visible on the wheel but prevents it from being selected. Higher whole numbers increase likelihood proportionally: an entry with weight `3` is three times as likely to be selected as an entry with weight `1`. Weights can apply to wheels, Plinko bins, raffle tickets, repeated cards, slot reels, and similar mechanics that use the same configuration format.
 
 ## Selection and animation
 
@@ -74,4 +77,4 @@ The wheel derives equal segment angles from any positive option count. The selec
 
 ## Tests
 
-`npm test` covers secure selection bounds, group/option mapping, empty and single inputs, deterministic alignment, validation states, sequential and linked interactions, configuration editing, keyboard activation, reduced motion, and local persistence. Weighted selection is intentionally not supported: each option has an equal chance.
+`npm test` covers secure selection bounds, weighted selection, group/option mapping, empty and single inputs, deterministic alignment, validation states, sequential and linked interactions, configuration editing, keyboard activation, reduced motion, and local persistence.
