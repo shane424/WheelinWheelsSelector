@@ -1,4 +1,6 @@
 export const STORAGE_KEY = 'wheelin-config-v1';
+export const HISTORY_STORAGE_KEY = 'wheelin-history-v1';
+export const HISTORY_LIMIT = 30;
 const makeOptions = (owner, color, labels) => labels.map((label, i) => ({ id: `${owner}-${i}`, label, color, weight: 1 }));
 export const DEFAULT_GROUPS = [
   { id: 'shane', label: 'Shane', color: '#ff6b6b', weight: 1, options: makeOptions('shane', '#ff6b6b', ['Rocket League', 'Fortnite', 'Minecraft', 'Overwatch 2']) },
@@ -63,4 +65,39 @@ export function parseConfig(text) {
   const value = JSON.parse(text);
   if (configState(value) === 'invalid') throw new Error('Groups and options need labels. Weights must be finite numbers greater than zero.');
   return normalizeConfig(value);
+}
+
+export const isHistoryRecord = record => record !== null
+  && typeof record === 'object'
+  && typeof record.group === 'string'
+  && typeof record.option === 'string'
+  && record.option.trim().length > 0
+  && typeof record.mode === 'string'
+  && record.mode.trim().length > 0
+  && typeof record.time === 'string'
+  && !Number.isNaN(Date.parse(record.time));
+
+export function parseHistory(text) {
+  if (!text) return [];
+  try {
+    const records = JSON.parse(text);
+    return Array.isArray(records) ? records.filter(isHistoryRecord).slice(0, HISTORY_LIMIT) : [];
+  } catch {
+    return [];
+  }
+}
+
+export const historyExportRecords = records => records.map(({ group, option, mode, time }) => ({
+  group, option, mode, timestamp: new Date(time).toISOString(),
+}));
+
+const csvCell = value => `"${String(value).replaceAll('"', '""')}"`;
+export function exportHistory(records, format = 'json') {
+  const values = historyExportRecords(records);
+  if (format === 'csv') {
+    return ['group,option,mode,timestamp', ...values.map(value =>
+      [value.group, value.option, value.mode, value.timestamp].map(csvCell).join(','),
+    )].join('\n');
+  }
+  return JSON.stringify(values, null, 2);
 }

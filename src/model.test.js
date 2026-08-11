@@ -33,3 +33,12 @@ describe('weighted selection',()=>{
   expect((alignedWeightedRotation(0,[{weight:1},{weight:3}],1,0)+225)%360).toBe(0);
  });
 });
+
+describe('history export',()=>{
+ it('exports the public record fields as JSON and CSV with ISO timestamps',async()=>{
+  const {exportHistory}=await import('./model');
+  const records=[{group:'Friends, Inc.',option:'Say "yes"',mode:'sequential',time:'2026-08-11T12:34:56.000Z',groupId:'private'}];
+  expect(JSON.parse(exportHistory(records,'json'))).toEqual([{group:'Friends, Inc.',option:'Say "yes"',mode:'sequential',timestamp:'2026-08-11T12:34:56.000Z'}]);
+  expect(exportHistory(records,'csv')).toBe('group,option,mode,timestamp\n"Friends, Inc.","Say ""yes""","sequential","2026-08-11T12:34:56.000Z"');
+ });
+});
