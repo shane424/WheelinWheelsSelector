@@ -1,4 +1,4 @@
-import { secureWeightedIndex } from './model';
+import { secureWeightedIndex, selectableGroups } from './model';
 const choose = (items, indexer) => indexer ? indexer(items.length) : secureWeightedIndex(items);
 
 export const pairsFromGroups = groups => (groups ?? []).flatMap(group =>
@@ -21,7 +21,7 @@ export function knockout(items, indexer) {
 }
 
 export function groupPlayoffs(groups, indexer) {
-  const finalists = (groups ?? []).filter(group => group.options?.length).map(group => {
+  const finalists = selectableGroups(groups).map(group => {
     const option = group.options[choose(group.options, indexer)];
     return { id: `${group.id}:${option.id}`, label: `${group.label} · ${option.label}`,
       group, option, color: option.color || group.color, weight: (group.weight ?? 1) * (option.weight ?? 1) };
