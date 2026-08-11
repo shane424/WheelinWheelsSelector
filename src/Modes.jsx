@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Wheel } from './Wheel';
 import { cascade, groupPlayoffs, historyRecord, knockout, pairsFromGroups, takeRandom, tournament } from './selection';
-import { normalizeTerminology, secureWeightedIndex } from './model';
+import { normalizeTerminology, secureWeightedIndex, selectableGroups } from './model';
 const defaultTerminology = { groupNoun:'group', optionNoun:'option' };
 const title = value => value.charAt(0).toUpperCase()+value.slice(1);
 
@@ -40,6 +40,11 @@ function Sequential({ groups, onResult, reducedMotion, disabled, terminology=def
   const chooseGroup=value=>{setGroup(value);if(pending.current)setTimeout(()=>{if(!optionRef.current?.spin()){pending.current=false;combinedActive.current=false}},reducedMotion?0:30)};
   const chooseOption=option=>{const candidate={group,option};const value=historyRecord('sequential',candidate);pending.current=false;combinedActive.current=false;setRecord(value);onResult(value)};
   const spinBoth=()=>{if(combinedActive.current||groupRef.current?.state==='spinning'||optionRef.current?.state==='spinning')return;combinedActive.current=true;pending.current=true;if(!groupRef.current?.spin()){pending.current=false;combinedActive.current=false}};
+  useEffect(()=>setGroup(current=>{
+    const next=current&&groups.find(candidate=>candidate.id===current.id);
+    if(!next){pending.current=false;combinedActive.current=false;}
+    return next??null;
+  }),[groups]);
   const {groupNoun,optionNoun}=normalizeTerminology(terminology);
   return <><p className="muted">First {groupNoun}. Then {optionNoun}.</p><div className="wheel-stage"><div><span className="step">01 · {groupNoun.toUpperCase()}</span><Wheel ref={groupRef} items={groups} onSelect={chooseGroup} disabled={disabled} reducedMotion={reducedMotion} label={`${title(groupNoun)} wheel`}/></div><div className="stage-arrow">→</div><div><span className="step">02 · {optionNoun.toUpperCase()}</span><Wheel ref={optionRef} items={group?.options ?? []} onSelect={chooseOption} disabled={disabled||!group} reducedMotion={reducedMotion} label={`${title(optionNoun)} wheel`}/></div></div><div className="spin-controls"><button className="primary" onClick={()=>groupRef.current?.spin()} disabled={disabled}>Spin {groupNoun}</button><button className="primary alt" onClick={()=>optionRef.current?.spin()} disabled={disabled||!group}>Spin {optionNoun}</button><button className="outline" onClick={spinBoth} disabled={disabled}>Spin both</button></div><Result record={record}/></>;
 }
@@ -76,15 +81,18 @@ function Nested({ groups, pairs, onResult, reducedMotion, disabled, mode }) {
   const groupRef=useRef(); const optionRef=useRef(); const [group,setGroup]=useState(null); const [record,setRecord]=useState(null);
   const play=()=>groupRef.current?.spin();
   const selectedGroup=g=>{setGroup(g);setTimeout(()=>optionRef.current?.spin(),reducedMotion?0:30)};
+  useEffect(()=>setGroup(current=>current ? groups.find(candidate=>candidate.id===current.id)??null : null),[groups]);
   return <><div className="nested-rings"><Wheel ref={groupRef} items={groups} label="Outer ring" onSelect={selectedGroup} disabled={disabled} reducedMotion={reducedMotion}/><Wheel ref={optionRef} items={group?.options??[]} label="Inner ring" onSelect={option=>{const value=historyRecord(mode.id,{group,option});setRecord(value);onResult(value)}} disabled={disabled||!group} reducedMotion={reducedMotion} size="small"/></div><div className="spin-controls"><button className="primary" onClick={play} disabled={disabled}>Rotate both rings</button></div><Result record={record}/></>;
 }
 
 export function SelectionMode({ mode, groups, onResult, reducedMotion=false, disabled=false, terminology=defaultTerminology }) {
-  const pairs=useMemo(()=>pairsFromGroups(groups),[groups]);
-  if(mode.id==='sequential')return <Sequential {...{groups,onResult,reducedMotion,disabled,terminology}}/>;
-  if(mode.kind==='wheel')return <Giant {...{pairs,onResult,reducedMotion,disabled,mode}}/>;
-  if(mode.kind==='nested')return <Nested {...{groups,pairs,onResult,reducedMotion,disabled,mode}}/>;
-  return <Mechanic {...{mode,groups,pairs,onResult,reducedMotion,disabled}}/>;
+  const eligibleGroups=useMemo(()=>selectableGroups(groups),[groups]);
+  const pairs=useMemo(()=>pairsFromGroups(eligibleGroups),[eligibleGroups]);
+  const selectionDisabled=disabled||!eligibleGroups.length;
+  if(mode.id==='sequential')return <Sequential groups={eligibleGroups} {...{onResult,reducedMotion,terminology}} disabled={selectionDisabled}/>;
+  if(mode.kind==='wheel')return <Giant {...{pairs,onResult,reducedMotion,mode}} disabled={selectionDisabled}/>;
+  if(mode.kind==='nested')return <Nested groups={eligibleGroups} {...{pairs,onResult,reducedMotion,mode}} disabled={selectionDisabled}/>;
+  return <Mechanic groups={eligibleGroups} {...{mode,pairs,onResult,reducedMotion}} disabled={selectionDisabled}/>;
 }
 
 export function Modes({ groups, onResult, reducedMotion=false, disabled=false, terminology=defaultTerminology }) {

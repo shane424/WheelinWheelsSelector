@@ -66,7 +66,15 @@ export const alignedWeightedRotation = (current, items, index, turns = 5) => {
   return current + turns * 360 + ((target - normalized + 360) % 360);
 };
 export const optionsForGroup = (groups, id) => groups.find(g => g.id === id)?.options ?? [];
-export const configState = groups => !Array.isArray(groups) ? 'invalid' : !groups.length ? 'empty' : groups.some(g => !g?.id || !String(g.label).trim() || !Array.isArray(g.options) || (g.weight !== undefined && !validWeight(g.weight)) || g.options.some(option => !option?.id || !String(option.label).trim() || (option.weight !== undefined && !validWeight(option.weight)))) ? 'invalid' : 'ready';
+export const validOption = option => Boolean(option?.id && String(option.label).trim()
+  && (option.weight === undefined || validWeight(option.weight)));
+// Keep incomplete groups in the editor, but expose only choices that can produce a
+// meaningful final group-and-option result to selection mechanics.
+export const selectableGroups = groups => (groups ?? []).flatMap(group => {
+  const options = Array.isArray(group?.options) ? group.options.filter(validOption) : [];
+  return options.length ? [{ ...group, options }] : [];
+});
+export const configState = groups => !Array.isArray(groups) ? 'invalid' : !groups.length ? 'empty' : groups.some(g => !g?.id || !String(g.label).trim() || !Array.isArray(g.options) || (g.weight !== undefined && !validWeight(g.weight)) || g.options.some(option => !option?.id || (option.weight !== undefined && !validWeight(option.weight)))) ? 'invalid' : 'ready';
 export const normalizeConfig = groups => groups.map(group => ({ ...group, weight: group.weight ?? 1, options: group.options.map(option => ({ ...option, weight: option.weight ?? 1 })) }));
 export function parseConfig(text) {
   return parseConfiguration(text).groups;
