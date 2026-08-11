@@ -1,5 +1,5 @@
 import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import { alignedRotation, secureIndex } from './model';
+import { alignedRotation, secureIndex, weightedIndex } from './model';
 
 const palette = ['#ff6b6b','#f7c948','#4dd4ac','#6c8cff','#b877f2','#ff8f5c','#43b7d4'];
 export const Wheel = forwardRef(function Wheel({ items = [], label = 'Selection wheel', onSelect, disabled = false, duration = 2400, size = 'large' }, ref) {
@@ -11,7 +11,8 @@ export const Wheel = forwardRef(function Wheel({ items = [], label = 'Selection 
   const background = useMemo(() => safe.length ? `conic-gradient(${safe.map((item,i) => `${item.color || palette[i%palette.length]} ${i*360/safe.length}deg ${(i+1)*360/safe.length}deg`).join(',')})` : '#292744', [safe]);
   const spin = () => {
     if (state === 'spinning' || disabled || !safe.length) return false;
-    const index = secureIndex(safe.length);
+    const index = weightedIndex(safe);
+    if (index === null) return false;
     const chosen = safe[index]; // selection is fixed before visual animation starts
     const reduced = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
     const ms = reduced ? 0 : duration;

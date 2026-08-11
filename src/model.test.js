@@ -1,7 +1,8 @@
-import { describe,expect,it,vi } from 'vitest';import{alignedRotation,configState,optionsForGroup,secureIndex}from'./model';
+import { describe,expect,it,vi } from 'vitest';import{alignedRotation,configState,optionsForGroup,secureIndex,weightedIndex}from'./model';
 describe('selection model',()=>{
  it('returns null for empty and a valid selection bound otherwise',()=>{expect(secureIndex(0)).toBeNull();for(let i=0;i<40;i++)expect(secureIndex(4)).toBeGreaterThanOrEqual(0),expect(secureIndex(4)).toBeLessThan(4)});
  it('maps a group only to its own options',()=>expect(optionsForGroup([{id:'a',options:[1]},{id:'b',options:[2]}],'b')).toEqual([2]));
+ it('selects options proportionally by whole-number weight',()=>{const items=[{label:'zero',weight:0},{label:'one'},{label:'three',weight:3}];expect(weightedIndex(items,()=>0)).toBe(1);expect(weightedIndex(items,()=>3)).toBe(2);expect(weightedIndex([{label:'never',weight:0}],()=>0)).toBeNull()});
  it('handles empty and single option inputs',()=>{expect(optionsForGroup([],'x')).toEqual([]);expect(secureIndex(1)).toBe(0);expect(configState([])).toBe('empty')});
  it('rejects invalid configurations',()=>expect(configState([{id:'a',label:'',options:[]}])).toBe('invalid'));
  it('aligns a chosen segment center at the fixed pointer',()=>{const angle=alignedRotation(27,2,5,5);expect(angle).toBeGreaterThan(1800);expect(((angle+(2.5*72))%360+360)%360).toBeCloseTo(0)});
