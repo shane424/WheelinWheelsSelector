@@ -1,14 +1,14 @@
-export const STORAGE_KEY = 'wheelin-config-v1';
+export const STORAGE_KEY = 'wheelin-config-v2';
 export const HISTORY_STORAGE_KEY = 'wheelin-history-v1';
 export const HISTORY_LIMIT = 30;
 export const DEFAULT_TERMINOLOGY = Object.freeze({ groupNoun: 'group', optionNoun: 'option' });
 export const SEEDED_TERMINOLOGY = Object.freeze({ groupNoun: 'person', optionNoun: 'game' });
 const makeOptions = (owner, color, labels) => labels.map((label, i) => ({ id: `${owner}-${i}`, label, color, weight: 1 }));
 export const DEFAULT_GROUPS = [
-  { id: 'shane', label: 'Shane', color: '#ff6b6b', weight: 1, options: makeOptions('shane', '#ff6b6b', ['Rocket League', 'Fortnite', 'Minecraft', 'Overwatch 2']) },
-  { id: 'alex', label: 'Alex', color: '#4dd4ac', weight: 1, options: makeOptions('alex', '#4dd4ac', ['Apex Legends', 'Valorant', 'Helldivers 2', 'Sea of Thieves']) },
-  { id: 'jason', label: 'Jason', color: '#6c8cff', weight: 1, options: makeOptions('jason', '#6c8cff', ['Call of Duty', 'Diablo IV', 'Destiny 2', 'Fall Guys']) },
-  { id: 'hutch', label: 'Hutch', color: '#f7c948', weight: 1, options: makeOptions('hutch', '#f7c948', ['Grand Theft Auto V', 'Halo Infinite', 'Party Animals', 'Golf With Your Friends']) },
+  { id: 'shane', label: 'Shane', color: '#ff6b6b', weight: 1, options: makeOptions('shane', '#ff6b6b', ['Battleship', 'Sorry', 'Bingo', 'Dungeon Draft', 'Sun Tzu']) },
+  { id: 'alex', label: 'Alex', color: '#4dd4ac', weight: 1, options: makeOptions('alex', '#4dd4ac', ['Backgammon', 'Roulette', 'Drillers', 'Dominant Species', 'Wingspan']) },
+  { id: 'jason', label: 'Jason', color: '#6c8cff', weight: 1, options: makeOptions('jason', '#6c8cff', ['Risk', 'Candy Land', 'Civolution', 'Beast', 'Fort', 'Entropy']) },
+  { id: 'hutch', label: 'Hutch', color: '#f7c948', weight: 1, options: makeOptions('hutch', '#f7c948', ['Mega Spell Wars', 'Small World', 'Magic: The Gathering', 'The Witcher']) },
 ];
 export const cloneDefaults = () => structuredClone(DEFAULT_GROUPS);
 export const normalizeTerminology = metadata => ({

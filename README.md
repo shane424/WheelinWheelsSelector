@@ -48,7 +48,7 @@ Every playable mode honors configured weights. Wheel segment areas also represen
 
 ## Editing and local storage
 
-The editor can add, rename, recolor, reorder, or delete any group and option. Changes save automatically to the browser's `localStorage` under `wheelin-config-v1`; selection history uses the separately versioned `wheelin-history-v1` key. **Reset defaults** restores the bundled example. **Export JSON** downloads the current configuration; **Import JSON** validates and loads one.
+The editor can add, rename, recolor, reorder, or delete any group and option. Changes save automatically to the browser's `localStorage` under `wheelin-config-v2`; selection history uses the separately versioned `wheelin-history-v1` key. The configuration key was incremented so existing installations receive the corrected bundled game lists automatically. **Reset defaults** restores the bundled example. **Export JSON** downloads the current configuration; **Import JSON** validates and loads one.
 
 The import/export format includes configuration metadata and an array of group objects. Singular nouns default to `group` and `option` for legacy configurations; the bundled games example uses `person` and `game`. IDs should be unique strings and labels preserve their exact spelling:
 
