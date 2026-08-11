@@ -19,7 +19,7 @@ Open the URL printed by Vite (normally `http://localhost:5173`). For a productio
 2. Select **Spin game**, or use **Spin both** to run both stages in sequence.
 3. Replay both stages or re-spin only the option from the result card.
 
-The labels are examples, not a restriction: rename groups to households, meal types, project phases, or anything else. Results are timestamped in the in-memory history. The latest 30 selections are shown, and history can be cleared.
+The labels are examples, not a restriction: rename groups to households, meal types, project phases, or anything else. Results are timestamped and saved locally. The latest 30 valid selections are retained across browser sessions; older and malformed stored records are discarded automatically. History can be exported as JSON or CSV, and **Clear** also clears the persisted history.
 
 ## Spin modes
 
@@ -48,7 +48,7 @@ Every playable mode honors configured weights. Wheel segment areas also represen
 
 ## Editing and local storage
 
-The editor can add, rename, recolor, reorder, or delete any group and option. Changes save automatically to the browser's `localStorage` under `wheelin-config-v1`. **Reset defaults** restores the bundled example. **Export JSON** downloads the current configuration; **Import JSON** validates and loads one.
+The editor can add, rename, recolor, reorder, or delete any group and option. Changes save automatically to the browser's `localStorage` under `wheelin-config-v1`; selection history uses the separately versioned `wheelin-history-v1` key. **Reset defaults** restores the bundled example. **Export JSON** downloads the current configuration; **Import JSON** validates and loads one.
 
 The import/export format is an array of group objects. IDs should be unique strings and labels preserve their exact spelling:
 
