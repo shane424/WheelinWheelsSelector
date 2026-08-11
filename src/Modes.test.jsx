@@ -1,22 +1,156 @@
 import React from 'react';
-import { describe,expect,it,vi } from 'vitest';
-import { fireEvent,render,screen,waitFor,within } from '@testing-library/react';
-import { MODE_METADATA,Modes,SelectionMode,STATUS_LABELS,STATUS_MEANINGS } from './Modes';
-const groups=[{id:'a',label:'A',color:'#f00',options:[{id:'1',label:'One'},{id:'2',label:'Two'}]},{id:'b',label:'B',color:'#0f0',options:[{id:'3',label:'Three'}]}];
-describe('mode components',()=>{
- it('drives every gallery card from playable metadata and returns to default',()=>{render(<Modes groups={groups} onResult={()=>{}} reducedMotion/>);expect(screen.getAllByRole('button',{name:/^(Play this mode|Try interactive preview)$/})).toHaveLength(MODE_METADATA.length);fireEvent.click(screen.getAllByRole('button',{name:/^(Play this mode|Try interactive preview)$/})[4]);expect(screen.getByRole('heading',{name:'Tournament',level:2})).toBeTruthy();fireEvent.click(screen.getByText('Return to default'));expect(screen.getByRole('heading',{name:'Sequential wheels',level:2})).toBeTruthy()});
- it('defines consistent status vocabulary and classifies the generic linked visualization as a preview',()=>{expect(STATUS_LABELS).toEqual({implemented:'Implemented',preview:'Interactive preview',concept:'Concept'});expect(Object.keys(STATUS_MEANINGS)).toEqual(Object.keys(STATUS_LABELS));expect(MODE_METADATA.find(mode=>mode.id==='linked')).toMatchObject({status:'preview',description:expect.stringContaining('automatic two-stage spin')})});
- it('keeps status badges and gallery actions consistent',()=>{render(<Modes groups={groups} onResult={()=>{}} reducedMotion/>);for(const mode of MODE_METADATA){const card=screen.getByRole('heading',{name:new RegExp(`^${mode.name}`),level:3}).closest('article');expect(within(card).getByText(STATUS_LABELS[mode.status]).classList.contains(mode.status)).toBe(true);if(mode.status==='concept')expect(within(card).queryByRole('button')).toBeNull();else expect(within(card).getByRole('button',{name:mode.status==='preview'?'Try interactive preview':'Play this mode'})).toBeTruthy()}});
- it('renders a concept as a noninteractive design card rather than a playable experience',()=>{render(<SelectionMode mode={{id:'future',name:'Future mode',kind:'motion',status:'concept'}} groups={groups} onResult={()=>{}}/>);expect(screen.getByText(/noninteractive design concept/)).toBeTruthy();expect(screen.queryByRole('button')).toBeNull()});
- for(const mode of MODE_METADATA.filter(x=>!['sequential','nested'].includes(x.id))){
-  it(`${mode.name} produces a normalized result`,async()=>{const result=vi.fn();render(<SelectionMode mode={mode} groups={groups} onResult={result} reducedMotion/>);const button=screen.getByRole('button',{name:mode.kind==='wheel'?new RegExp(`${mode.name} wheel`):`Run ${mode.name} preview`});fireEvent.click(button);await waitFor(()=>expect(result).toHaveBeenCalled());expect(result.mock.calls[0][0]).toMatchObject({mode:mode.id,groupId:expect.any(String),optionId:expect.any(String),selections:expect.any(Array),time:expect.any(String)})});
- }
- it('linked wheels always select an option from the chosen group',async()=>{const result=vi.fn();render(<SelectionMode mode={MODE_METADATA.find(mode=>mode.id==='linked')} groups={groups} onResult={result} reducedMotion/>);fireEvent.click(screen.getByText('Run Linked wheels preview'));await waitFor(()=>expect(result).toHaveBeenCalled());const record=result.mock.calls[0][0];expect(groups.find(g=>g.id===record.groupId).options.some(o=>o.id===record.optionId)).toBe(true)});
- it('sequential wheels preserve the group-to-option relationship',async()=>{const result=vi.fn();render(<SelectionMode mode={MODE_METADATA[0]} groups={groups} onResult={result} reducedMotion/>);fireEvent.click(screen.getByText('Spin both'));await waitFor(()=>expect(result).toHaveBeenCalled());expect(groups.find(g=>g.id===result.mock.calls[0][0].groupId).options.some(o=>o.id===result.mock.calls[0][0].optionId)).toBe(true)});
- it('ignores duplicate combined spins while either wheel is active',async()=>{const result=vi.fn();render(<SelectionMode mode={MODE_METADATA[0]} groups={groups} onResult={result}/>);const combined=screen.getByText('Spin both');fireEvent.click(combined);fireEvent.click(combined);await waitFor(()=>expect(screen.getByRole('button',{name:/Option wheel/}).disabled).toBe(false),{timeout:3000});fireEvent.click(combined);await waitFor(()=>expect(result).toHaveBeenCalledTimes(1),{timeout:3000})},7000);
- it('nested wheels rotate outer and inner rings independently',async()=>{const result=vi.fn();render(<SelectionMode mode={MODE_METADATA[2]} groups={groups} onResult={result} reducedMotion/>);fireEvent.click(screen.getByText('Rotate both rings'));await waitFor(()=>expect(result).toHaveBeenCalled());expect(screen.getByRole('button',{name:/Outer ring/})).toBeTruthy();expect(screen.getByRole('button',{name:/Inner ring/})).toBeTruthy()});
- it('skips empty groups when Spin both runs',async()=>{const result=vi.fn();render(<SelectionMode mode={MODE_METADATA[0]} groups={[{id:'empty',label:'Empty',options:[]},groups[0]]} onResult={result} reducedMotion/>);fireEvent.click(screen.getByText('Spin both'));await waitFor(()=>expect(result).toHaveBeenCalled());expect(result.mock.calls[0][0]).toMatchObject({groupId:'a',optionId:expect.any(String)})});
- it('disables all two-stage controls when no group has a valid option',()=>{render(<SelectionMode mode={MODE_METADATA[0]} groups={[{id:'empty',label:'Empty',options:[]},{id:'blank',label:'Blank',options:[{id:'x',label:' '}]}]} onResult={()=>{}} reducedMotion/>);expect(screen.getByText('Spin group').disabled).toBe(true);expect(screen.getByText('Spin both').disabled).toBe(true)});
- it('clears a selected group after its last option is deleted',async()=>{const result=vi.fn();const {rerender}=render(<SelectionMode mode={MODE_METADATA[0]} groups={[groups[0]]} onResult={result} reducedMotion/>);fireEvent.click(screen.getByText('Spin group'));await waitFor(()=>expect(screen.getByText('Spin option').disabled).toBe(false));rerender(<SelectionMode mode={MODE_METADATA[0]} groups={[{...groups[0],options:[]}]} onResult={result} reducedMotion/>);await waitFor(()=>expect(screen.getByText('Spin option').disabled).toBe(true));expect(screen.getByText('Spin both').disabled).toBe(true)});
- it('honors disabled state',()=>{render(<SelectionMode mode={MODE_METADATA[4]} groups={groups} onResult={()=>{}} reducedMotion disabled/>);expect(screen.getByText('Run Tournament preview').disabled).toBe(true)});
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { MODE_METADATA, Modes, SelectionMode } from './Modes';
+
+const groups = [
+  { id: 'alpha', label: 'Alpha', color: '#f00', weight: 1, options: [
+    { id: 'one', label: 'One', weight: 1 },
+    { id: 'two', label: 'Two', weight: 3 },
+  ] },
+  { id: 'beta', label: 'Beta', color: '#0f0', weight: 2, options: [
+    { id: 'three', label: 'Three', weight: 1 },
+    { id: 'four', label: 'Four', weight: 1 },
+  ] },
+];
+const knownOptions = new Set(groups.flatMap(group => group.options.map(option => option.label)));
+const knownModes = new Set(MODE_METADATA.map(mode => mode.id));
+
+function randomValues(...values) {
+  let call = 0;
+  return vi.spyOn(globalThis.crypto, 'getRandomValues').mockImplementation(array => {
+    array[0] = values[Math.min(call++, values.length - 1)] ?? 0;
+    return array;
+  });
+}
+
+function actionFor(mode) {
+  if (mode.id === 'sequential') return screen.getByRole('button', { name: 'Spin both' });
+  if (mode.id === 'nested') return screen.getByRole('button', { name: 'Rotate both rings' });
+  if (mode.kind === 'wheel') return screen.getByRole('button', { name: new RegExp(`^${mode.name} wheel`) });
+  return screen.getByRole('button', { name: `Run ${mode.name} preview` });
+}
+
+async function finishTimers() {
+  // Two-stage wheel modes schedule the second wheel only after React commits
+  // the first wheel's selected group, so flush each stage in its own act.
+  for (let stage = 0; stage < 8 && vi.getTimerCount(); stage += 1) {
+    await act(async () => { await vi.advanceTimersToNextTimerAsync(); });
+  }
+}
+
+function expectNormalized(record, mode) {
+  expect(knownModes).toContain(record.mode);
+  expect(record.mode).toBe(mode.id);
+  expect(Number.isNaN(Date.parse(record.time))).toBe(false);
+  expect(knownOptions).toContain(record.option);
+  expect(groups.some(group => group.label === record.group)).toBe(true);
+  expect(groups.find(group => group.id === record.groupId)?.options.some(option => option.id === record.optionId)).toBe(true);
+  expect(record.selections).toEqual(expect.any(Array));
+}
+
+describe('SelectionMode contract for every MODE_METADATA entry', () => {
+  beforeEach(() => { vi.useFakeTimers(); randomValues(0); });
+  afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers(); });
+
+  for (const mode of MODE_METADATA) {
+    it(`${mode.id}: activates once, rejects a duplicate, and returns one normalized configured result`, async () => {
+      const onResult = vi.fn();
+      render(<SelectionMode mode={mode} groups={groups} onResult={onResult} />);
+      const action = actionFor(mode);
+      expect(action.disabled).toBe(false);
+
+      fireEvent.click(action);
+      fireEvent.click(action);
+      await finishTimers();
+
+      expect(onResult).toHaveBeenCalledTimes(1);
+      expectNormalized(onResult.mock.calls[0][0], mode);
+    });
+
+    it(`${mode.id}: reduced motion resolves without an animation delay`, async () => {
+      const onResult = vi.fn();
+      render(<SelectionMode mode={mode} groups={groups} onResult={onResult} reducedMotion />);
+      fireEvent.click(actionFor(mode));
+      await finishTimers();
+      expect(onResult).toHaveBeenCalledTimes(1);
+    });
+
+    it(`${mode.id}: empty input disables its action without throwing`, () => {
+      const onResult = vi.fn();
+      expect(() => render(<SelectionMode mode={mode} groups={[]} onResult={onResult} reducedMotion />)).not.toThrow();
+      expect(actionFor(mode).disabled).toBe(true);
+      fireEvent.click(actionFor(mode));
+      expect(onResult).not.toHaveBeenCalled();
+    });
+  }
+});
+
+describe('deterministic weighted boundaries', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers(); });
+
+  it.each([
+    [0, 'One'],
+    [0x3fffffff, 'One'], // immediately below the 1/4 boundary
+    [0x40000000, 'Two'], // exactly on the boundary belongs to the next entry
+    [0xffffffff, 'Two'],
+  ])('maps injected uint32 value %i to the expected weighted option', async (boundary, expected) => {
+    randomValues(0, boundary, 0);
+    const onResult = vi.fn();
+    const mode = MODE_METADATA.find(candidate => candidate.id === 'linked');
+    render(<SelectionMode mode={mode} groups={[groups[0]]} onResult={onResult} reducedMotion />);
+    fireEvent.click(actionFor(mode));
+    await finishTimers();
+    expect(onResult).toHaveBeenCalledTimes(1);
+    expect(onResult.mock.calls[0][0].option).toBe(expected);
+  });
+});
+
+describe('multi-stage mode output', () => {
+  beforeEach(() => { vi.useFakeTimers(); randomValues(0); });
+  afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers(); });
+
+  const expectations = {
+    tournament: { intermediate: ['Alpha · One / Beta · Three', 'Alpha · One'], winner: 'One' },
+    knockout: { intermediate: ['Alpha · One', 'Alpha · Two', 'Beta · Three'], winner: 'Four' },
+    playoffs: { intermediate: ['Alpha · One', 'Beta · Three'], winner: 'One' },
+    cascading: { intermediate: ['Alpha', 'One'], winner: 'One' },
+    ranked: { intermediate: ['Alpha · One', 'Alpha · Two', 'Beta · Three'], winner: 'One' },
+  };
+
+  for (const [id, expected] of Object.entries(expectations)) {
+    it(`${id} exposes its intermediate structure and final winner`, async () => {
+      const mode = MODE_METADATA.find(candidate => candidate.id === id);
+      const onResult = vi.fn();
+      render(<SelectionMode mode={mode} groups={groups} onResult={onResult} />);
+      fireEvent.click(actionFor(mode));
+
+      const visual = screen.getByTestId(`${id}-visual`);
+      expect([...visual.querySelectorAll(':scope > div > span')].map(node => node.textContent)).toEqual(expected.intermediate);
+      expect(onResult).not.toHaveBeenCalled();
+
+      await finishTimers();
+      expect(onResult).toHaveBeenCalledTimes(1);
+      expect(onResult.mock.calls[0][0]).toMatchObject({ option: expected.winner, selections: expected.intermediate });
+    });
+  }
+});
+
+describe('Modes navigation', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers(); });
+
+  it('switches modes and Return to default restores Sequential wheels', async () => {
+    render(<Modes groups={groups} onResult={vi.fn()} reducedMotion />);
+    const tournamentCard = screen.getByRole('heading', { name: 'Tournament', level: 3 }).closest('article');
+    fireEvent.click(within(tournamentCard).getByRole('button', { name: 'Try interactive preview' }));
+    expect(screen.getByRole('heading', { name: 'Tournament', level: 2 })).toBeTruthy();
+    expect(within(tournamentCard).getByRole('button').getAttribute('aria-pressed')).toBe('true');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Return to default' }));
+    expect(screen.getByRole('heading', { name: 'Sequential wheels', level: 2 })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Return to default' })).toBeNull();
+    await finishTimers();
+  });
 });
