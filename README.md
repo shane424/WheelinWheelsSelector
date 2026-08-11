@@ -25,9 +25,9 @@ The labels are examples, not a restriction: rename groups to households, meal ty
 
 The gallery documents how the same group/option data model could support additional choice-making formats beyond the playable default:
 
-1. **Sequential wheels** (`implemented`, **Playable now**): group, then one of that group's options.
-2. **Linked wheels** (`planned`, **Playable now**): one control starts the group spin and then automatically spins options from the selected group, so simultaneous behavior is partially implemented through **Spin both**.
-3. **Nested wheels** (`concept`, **Concept**): an inner and outer wheel.
+1. **Sequential wheels** (`implemented`, **Playable**): group, then one of that group's options.
+2. **Linked wheels** (`implemented`, **Playable**): one control runs an automatic two-stage spin: it selects the group first and then spins only that group's options.
+3. **Nested wheels** (`planned`, **Preview**): an inner and outer wheel.
 4. **Giant wheel** (`concept`, **Concept**, **Uses weights**): flattened group/option combinations.
 5. **Tournament** (`concept`, **Concept**, **Uses weights**): bracket elimination.
 6. **Slot reels** (`concept`, **Concept**): independently stopping reels.
