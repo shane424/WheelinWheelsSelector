@@ -2,7 +2,7 @@ import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'reac
 import { alignedRotation, secureIndex } from './model';
 
 const palette = ['#ff6b6b','#f7c948','#4dd4ac','#6c8cff','#b877f2','#ff8f5c','#43b7d4'];
-export const Wheel = forwardRef(function Wheel({ items = [], label = 'Selection wheel', onSelect, disabled = false, duration = 2400, size = 'large' }, ref) {
+export const Wheel = forwardRef(function Wheel({ items = [], label = 'Selection wheel', onSelect, disabled = false, duration = 2400, size = 'large', reducedMotion }, ref) {
   const [rotation, setRotation] = useState(0);
   const [state, setState] = useState('idle');
   const [result, setResult] = useState('');
@@ -13,7 +13,7 @@ export const Wheel = forwardRef(function Wheel({ items = [], label = 'Selection 
     if (state === 'spinning' || disabled || !safe.length) return false;
     const index = secureIndex(safe.length);
     const chosen = safe[index]; // selection is fixed before visual animation starts
-    const reduced = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+    const reduced = reducedMotion ?? (globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false);
     const ms = reduced ? 0 : duration;
     const next = alignedRotation(rotation, index, safe.length, reduced ? 0 : 5 + secureIndex(3));
     setState('spinning'); setResult(''); setRotation(next);
@@ -26,7 +26,7 @@ export const Wheel = forwardRef(function Wheel({ items = [], label = 'Selection 
   return <div className={`wheel-unit ${size}`} data-state={status}>
     <div className="wheel-wrap">
       <div className="pointer" aria-hidden="true" />
-      <button className="wheel" type="button" aria-label={`${label}. ${safe.length ? 'Press Enter or Space to spin.' : 'No options available.'}`} disabled={disabled || !safe.length || state==='spinning'} onClick={spin} style={{background, transform:`rotate(${rotation}deg)`, transitionDuration: state==='spinning' ? `${duration}ms` : '0ms'}}>
+      <button className="wheel" type="button" aria-label={`${label}. ${safe.length ? 'Press Enter or Space to spin.' : 'No options available.'}`} disabled={disabled || !safe.length || state==='spinning'} onClick={spin} style={{background, transform:`rotate(${rotation}deg)`, transitionDuration: state==='spinning' ? `${reducedMotion ? 0 : duration}ms` : '0ms'}}>
         {safe.map((item,i) => <span key={item.id ?? i} className="segment-label" style={{transform:`rotate(${(i+.5)*360/safe.length}deg) translateY(-41%)`}}><b style={{transform:`rotate(-${(i+.5)*360/safe.length + rotation}deg)`}}>{item.label}</b></span>)}
         <i className="hub" />
       </button>
