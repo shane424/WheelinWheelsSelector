@@ -1,4 +1,4 @@
-import React from'react';import{beforeEach,describe,expect,it,vi}from'vitest';import{fireEvent,render,screen,waitFor}from'@testing-library/react';import App from'./App';import{HISTORY_STORAGE_KEY,STORAGE_KEY}from'./model';
+import React from'react';import{beforeEach,describe,expect,it,vi}from'vitest';import{fireEvent,render,screen,waitFor,within}from'@testing-library/react';import App from'./App';import{HISTORY_STORAGE_KEY,STORAGE_KEY}from'./model';
 const record=(number,patch={})=>({group:`Group ${number}`,option:`Option ${number}`,mode:'sequential',time:new Date(2026,0,1,0,number).toISOString(),...patch});
 beforeEach(()=>{localStorage.clear();vi.stubGlobal('matchMedia',vi.fn(()=>({matches:true,addEventListener:vi.fn(),removeEventListener:vi.fn()})));vi.stubGlobal('confirm',()=>true)});
 describe('application interactions',()=>{
@@ -15,4 +15,20 @@ describe('application interactions',()=>{
  it('discards malformed stored history entries',async()=>{localStorage.setItem(HISTORY_STORAGE_KEY,JSON.stringify([record(1),{group:'Broken',option:'No timestamp',mode:'sequential'}]));render(<App/>);expect(screen.getByText('Group 1')).toBeTruthy();expect(screen.queryByText('Broken')).toBeNull();await waitFor(()=>expect(JSON.parse(localStorage.getItem(HISTORY_STORAGE_KEY))).toEqual([record(1)]))});
  it('retains only the latest 30 loaded records',async()=>{localStorage.setItem(HISTORY_STORAGE_KEY,JSON.stringify(Array.from({length:35},(_,i)=>record(i))));const {container}=render(<App/>);expect(container.querySelectorAll('.history li')).toHaveLength(30);expect(screen.getByText('Group 0')).toBeTruthy();expect(screen.queryByText('Group 30')).toBeNull();await waitFor(()=>expect(JSON.parse(localStorage.getItem(HISTORY_STORAGE_KEY))).toHaveLength(30))});
  it('clears displayed and persisted history together',async()=>{localStorage.setItem(HISTORY_STORAGE_KEY,JSON.stringify([record(1)]));render(<App/>);fireEvent.click(screen.getByText('Clear'));expect(screen.getByText(/No selections yet/)).toBeTruthy();await waitFor(()=>expect(JSON.parse(localStorage.getItem(HISTORY_STORAGE_KEY))).toEqual([]))});
+});
+
+describe('completed selection modes',()=>{
+ const modeNames=['Tournament','Slot reels','Cascading choices','Group playoffs','Knockout','Ranked pointers','Plinko','Skee-ball','Pachinko','Marble racing','Dice','Cards','Raffle','Darts'];
+ for(const name of modeNames)it(`plays ${name} as a complete mechanic`,async()=>{
+  render(<App/>);const card=screen.getByRole('heading',{name,level:3}).closest('article');fireEvent.click(within(card).getByRole('button',{name:'Play this mode'}));
+  const play=screen.getByRole('button',{name:`Play ${name}`});expect(play.disabled).toBe(false);fireEvent.click(play);
+  await waitFor(()=>expect(screen.getByText('THE MODE HAS SPOKEN')).toBeTruthy());
+ });
+ it('uses a distinct board for every physical mechanic',()=>{
+  render(<App/>);
+  for(const name of ['Plinko','Skee-ball','Pachinko','Marble racing','Darts']){
+   const card=screen.getByRole('heading',{name,level:3}).closest('article');fireEvent.click(within(card).getByRole('button',{name:'Play this mode'}));
+   expect(screen.getByLabelText(`${name} animation`)).toBeTruthy();
+  }
+ });
 });
