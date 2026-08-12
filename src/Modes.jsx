@@ -87,15 +87,25 @@ function Mechanic({ mode, groups, pairs, onResult, reducedMotion, disabled }) {
 
 function ModeVisual({mode,display,playing}) {
   const glyph=mode.id==='dice'?'⚄':mode.id==='cards'?'🂠':mode.id==='raffle'?'🎟':mode.icon;
-  const special=['plinko','pachinko','skeeball','darts','marbles'].includes(mode.kind);
+  const special=['plinko','pachinko','skeeball','darts','marbles','slots','dice','cards','raffle'].includes(mode.kind);
   return <div className={`mechanic mechanic-${mode.kind} ${playing?'playing':''}`} data-testid={`${mode.id}-visual`} aria-label={`${mode.name} animation`}>
-    {(mode.kind==='plinko'||mode.kind==='pachinko')&&<div className={`peg-board ${mode.kind}`}><i/><i/><i/><i/><i/><i/><i/><b>●</b></div>}
-    {mode.kind==='skeeball'&&<div className="skee-lane"><i>10</i><i>25</i><i>50</i><b>●</b></div>}
-    {mode.kind==='darts'&&<div className="dart-target"><b>➳</b></div>}
-    {mode.kind==='marbles'&&<div className="race-track">{[0,1,2].map(i=><i key={i}>●</i>)}</div>}
+    {(mode.kind==='plinko'||mode.kind==='pachinko')&&<div className={`peg-board ${mode.kind}`}><div className="peg-grid">{Array.from({length:22},(_,i)=><i key={i}/>)}</div><b>●</b><footer><span/><span/><span/><span/></footer></div>}
+    {mode.kind==='skeeball'&&<div className="skee-machine"><div className="score-rings"><i>100</i><i>50</i><i>25</i></div><div className="skee-lane"><b>●</b></div></div>}
+    {mode.kind==='darts'&&<div className="dart-cabinet"><div className="dart-target"><b>➳</b></div><small>WHEELIN' DARTS</small></div>}
+    {mode.kind==='marbles'&&<div className="race-track">{[0,1,2].map(i=><div key={i}><em>Lane {i+1}</em><i>●</i><b>⚑</b></div>)}</div>}
+    {mode.kind==='slots'&&<div className="slot-machine"><header>LUCKY PICK</header><div>{[display[0]||'GROUP',display[1]||'OPTION'].map((x,i)=><span key={i}>{x}</span>)}</div><b>●</b></div>}
+    {mode.kind==='dice'&&<div className="dice-table"><strong>{glyph}</strong><i/><i/></div>}
+    {mode.kind==='cards'&&<div className="card-table"><i/><i/><strong>{glyph}</strong></div>}
+    {mode.kind==='raffle'&&<div className="raffle-drum"><span>● ● ●</span><strong>{glyph}</strong></div>}
     {!special&&<strong>{glyph}</strong>}
-    <div className="mechanic-results">{display.map((x,i)=><span key={`${x}-${i}`}>{x}</span>)}</div>
+    {mode.kind!=='slots'&&<VisualResults kind={mode.kind} display={display}/>}
   </div>;
+}
+
+function VisualResults({kind,display}) {
+  if(!display.length)return <div className="mechanic-empty">Press play to set everything in motion</div>;
+  const label=kind==='tournament'?'BRACKET':kind==='knockout'?'ELIMINATION BOARD':kind==='playoffs'?'FINALISTS':kind==='ranked'?'PODIUM':kind==='cascade'?'DECISION PATH':'RESULT';
+  return <section className={`mechanic-results results-${kind}`}><small>{label}</small><div>{display.map((x,i)=><span key={`${x}-${i}`} data-place={i+1}>{x}</span>)}</div></section>;
 }
 
 function Nested({ groups, pairs, onResult, reducedMotion, disabled, mode }) {

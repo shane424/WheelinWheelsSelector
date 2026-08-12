@@ -29,7 +29,7 @@ All eighteen formats are implemented and selectable from the gallery. They use t
 
 - **Wheel formats:** sequential, linked, nested, and one giant flattened wheel.
 - **Multi-round formats:** tournament brackets, group playoffs, knockout elimination, ranked results, and cascading paths show their intermediate selections.
-- **Physical formats:** Plinko, skee-ball, pachinko, marble racing, darts, dice, cards, raffle, and slot reels each have a distinct animated board or object.
+- **Physical formats:** Plinko, skee-ball, pachinko, marble racing, darts, dice, cards, raffle, and slot reels each use a recognizable, responsive game board or object with mode-specific motion.
 
 Every mode honors configured relative weights. Wheel segment areas also represent relative weights, with a text legend so even very small segments remain legible.
 

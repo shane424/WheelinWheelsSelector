@@ -127,7 +127,7 @@ describe('multi-stage mode output', () => {
       fireEvent.click(actionFor(mode));
 
       const visual = screen.getByTestId(`${id}-visual`);
-      expect([...visual.querySelectorAll(':scope > div > span')].map(node => node.textContent)).toEqual(expected.intermediate);
+      expect([...visual.querySelectorAll('.mechanic-results > div > span')].map(node => node.textContent)).toEqual(expected.intermediate);
       expect(onResult).not.toHaveBeenCalled();
 
       await finishTimers();
