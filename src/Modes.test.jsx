@@ -28,7 +28,7 @@ function actionFor(mode) {
   if (mode.id === 'sequential') return screen.getByRole('button', { name: 'Spin both' });
   if (mode.id === 'nested') return screen.getByRole('button', { name: 'Rotate both rings' });
   if (mode.kind === 'wheel') return screen.getByRole('button', { name: new RegExp(`^${mode.name} wheel`) });
-  return screen.getByRole('button', { name: `Run ${mode.name} preview` });
+  return screen.getByRole('button', { name: `Play ${mode.name}` });
 }
 
 async function finishTimers() {
@@ -112,11 +112,11 @@ describe('multi-stage mode output', () => {
   afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers(); });
 
   const expectations = {
-    tournament: { intermediate: ['Alpha · One / Beta · Three', 'Alpha · One'], winner: 'One' },
-    knockout: { intermediate: ['Alpha · One', 'Alpha · Two', 'Beta · Three'], winner: 'Four' },
-    playoffs: { intermediate: ['Alpha · One', 'Beta · Three'], winner: 'One' },
+    tournament: { intermediate: ['Round 1: Alpha · One · Beta · Three', 'Round 2: Alpha · One'], winner: 'One' },
+    knockout: { intermediate: ['✕ Alpha · One', '✕ Alpha · Two', '✕ Beta · Three', '★ Beta · Four'], winner: 'Four' },
+    playoffs: { intermediate: ['★ Alpha · One', '○ Beta · Three'], winner: 'One' },
     cascading: { intermediate: ['Alpha', 'One'], winner: 'One' },
-    ranked: { intermediate: ['Alpha · One', 'Alpha · Two', 'Beta · Three'], winner: 'One' },
+    ranked: { intermediate: ['1. Alpha · One', '2. Alpha · Two', '3. Beta · Three'], winner: 'One' },
   };
 
   for (const [id, expected] of Object.entries(expectations)) {
@@ -127,7 +127,7 @@ describe('multi-stage mode output', () => {
       fireEvent.click(actionFor(mode));
 
       const visual = screen.getByTestId(`${id}-visual`);
-      expect([...visual.querySelectorAll(':scope > div > span')].map(node => node.textContent)).toEqual(expected.intermediate);
+      expect([...visual.querySelectorAll('.mechanic-results > div > span')].map(node => node.textContent)).toEqual(expected.intermediate);
       expect(onResult).not.toHaveBeenCalled();
 
       await finishTimers();
@@ -144,7 +144,7 @@ describe('Modes navigation', () => {
   it('switches modes and Return to default restores Sequential wheels', async () => {
     render(<Modes groups={groups} onResult={vi.fn()} reducedMotion />);
     const tournamentCard = screen.getByRole('heading', { name: 'Tournament', level: 3 }).closest('article');
-    fireEvent.click(within(tournamentCard).getByRole('button', { name: 'Try interactive preview' }));
+    fireEvent.click(within(tournamentCard).getByRole('button', { name: 'Play this mode' }));
     expect(screen.getByRole('heading', { name: 'Tournament', level: 2 })).toBeTruthy();
     expect(within(tournamentCard).getByRole('button').getAttribute('aria-pressed')).toBe('true');
 

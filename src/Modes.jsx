@@ -7,23 +7,23 @@ const title = value => value.charAt(0).toUpperCase()+value.slice(1);
 
 export const MODE_METADATA = [
   { id:'sequential', icon:'① → ②', name:'Sequential wheels', description:'Pick a group, then an option from only that group.', kind:'sequential', status:'implemented' },
-  { id:'linked', icon:'◎ ◎', name:'Linked wheels', description:'One control runs an automatic two-stage spin: group first, then an option from that group.', kind:'slots', status:'preview' },
+  { id:'linked', icon:'◎ ◎', name:'Linked wheels', description:'One control runs an automatic two-stage spin: group first, then an option from that group.', kind:'slots', status:'implemented' },
   { id:'nested', icon:'◉', name:'Nested wheels', description:'Independently rotating inner and outer rings reveal a paired choice.', kind:'nested', status:'implemented' },
   { id:'giant', icon:'✹', name:'Giant wheel', description:'Every group-and-option pairing on one wheel.', kind:'wheel', status:'implemented' },
-  { id:'tournament', icon:'🏆', name:'Tournament', description:'Choices compete through a generated elimination bracket.', kind:'tournament', status:'preview' },
-  { id:'slots', icon:'▥', name:'Slot reels', description:'Group and its related option reels stop in sequence.', kind:'slots', status:'preview' },
-  { id:'cascading', icon:'⌄⌄⌄', name:'Cascading choices', description:'Make a choice at each level of an arbitrary decision tree.', kind:'cascade', status:'preview' },
-  { id:'playoffs', icon:'◌ ◌ ◉', name:'Group playoffs', description:'Select one option from every group, then select the winning group.', kind:'playoffs', status:'preview' },
-  { id:'knockout', icon:'✕ ◯', name:'Knockout', description:'Remove one randomly selected candidate per round until one remains.', kind:'knockout', status:'preview' },
-  { id:'ranked', icon:'Ⅰ Ⅱ Ⅲ', name:'Ranked pointers', description:'Sample a unique ranked shortlist without replacement.', kind:'ranked', status:'preview' },
-  { id:'plinko', icon:'⫶', name:'Plinko', description:'Drop a puck through pins into an outcome slot.', kind:'motion', status:'preview' },
-  { id:'skeeball', icon:'⛳', name:'Skee-ball', description:'Roll toward a target mapped to a configured choice.', kind:'motion', status:'preview' },
-  { id:'pachinko', icon:'◍', name:'Pachinko', description:'Bounce a ball through pegs into a choice pocket.', kind:'motion', status:'preview' },
-  { id:'marbles', icon:'● ↘', name:'Marble racing', description:'Race the configured choices to a selected winner.', kind:'motion', status:'preview' },
-  { id:'dice', icon:'⚂', name:'Dice', description:'Roll a fair custom face mapped to each configured choice.', kind:'alternate', status:'preview' },
-  { id:'cards', icon:'🂠', name:'Cards', description:'Draw from a shuffled deck of the configured choices.', kind:'alternate', status:'preview' },
-  { id:'raffle', icon:'🎟', name:'Raffle', description:'Pull one ticket from the configured choices.', kind:'alternate', status:'preview' },
-  { id:'darts', icon:'◎', name:'Darts', description:'Throw at equal target regions representing available choices.', kind:'motion', status:'preview' },
+  { id:'tournament', icon:'🏆', name:'Tournament', description:'Choices compete through a generated elimination bracket.', kind:'tournament', status:'implemented' },
+  { id:'slots', icon:'▥', name:'Slot reels', description:'Group and its related option reels stop in sequence.', kind:'slots', status:'implemented' },
+  { id:'cascading', icon:'⌄⌄⌄', name:'Cascading choices', description:'Make a choice at each level of an arbitrary decision tree.', kind:'cascade', status:'implemented' },
+  { id:'playoffs', icon:'◌ ◌ ◉', name:'Group playoffs', description:'Select one option from every group, then select the winning group.', kind:'playoffs', status:'implemented' },
+  { id:'knockout', icon:'✕ ◯', name:'Knockout', description:'Remove one randomly selected candidate per round until one remains.', kind:'knockout', status:'implemented' },
+  { id:'ranked', icon:'Ⅰ Ⅱ Ⅲ', name:'Ranked pointers', description:'Sample a unique ranked shortlist without replacement.', kind:'ranked', status:'implemented' },
+  { id:'plinko', icon:'⫶', name:'Plinko', description:'Drop a puck through pins into an outcome slot.', kind:'plinko', status:'implemented' },
+  { id:'skeeball', icon:'⛳', name:'Skee-ball', description:'Roll toward a target mapped to a configured choice.', kind:'skeeball', status:'implemented' },
+  { id:'pachinko', icon:'◍', name:'Pachinko', description:'Bounce a ball through pegs into a choice pocket.', kind:'pachinko', status:'implemented' },
+  { id:'marbles', icon:'● ↘', name:'Marble racing', description:'Race the configured choices to a selected winner.', kind:'marbles', status:'implemented' },
+  { id:'dice', icon:'⚂', name:'Dice', description:'Roll a weighted custom face mapped to each configured choice.', kind:'dice', status:'implemented' },
+  { id:'cards', icon:'🂠', name:'Cards', description:'Draw from a shuffled deck of the configured choices.', kind:'cards', status:'implemented' },
+  { id:'raffle', icon:'🎟', name:'Raffle', description:'Pull one ticket from the configured choices.', kind:'raffle', status:'implemented' },
+  { id:'darts', icon:'◎', name:'Darts', description:'Throw at weighted target regions representing available choices.', kind:'darts', status:'implemented' },
 ];
 
 export const STATUS_LABELS = { implemented:'Implemented', preview:'Interactive preview', concept:'Concept' };
@@ -69,10 +69,10 @@ function Mechanic({ mode, groups, pairs, onResult, reducedMotion, disabled }) {
   const play=()=>{
     if(disabled||playing||!pairs.length)return;
     let candidate; let selections=[];
-    if(mode.kind==='knockout'){const value=knockout(pairs);candidate=value.winner;selections=value.eliminated.map(x=>x.label);}
-    else if(mode.kind==='ranked'){const value=takeRandom(pairs,Math.min(3,pairs.length));candidate=value[0];selections=value.map(x=>x.label);}
-    else if(mode.kind==='playoffs'){const value=groupPlayoffs(groups);candidate=value.winner;selections=value.finalists.map(x=>x.label);}
-    else if(mode.kind==='tournament'){const value=tournament(pairs);candidate=value.winner;selections=value.rounds.map(round=>round.map(match=>match.winner.label).join(' / '));}
+    if(mode.kind==='knockout'){const value=knockout(pairs);candidate=value.winner;selections=[...value.eliminated.map(x=>`✕ ${x.label}`),`★ ${value.winner.label}`];}
+    else if(mode.kind==='ranked'){const value=takeRandom(pairs,Math.min(3,pairs.length));candidate=value[0];selections=value.map((x,i)=>`${i+1}. ${x.label}`);}
+    else if(mode.kind==='playoffs'){const value=groupPlayoffs(groups);candidate=value.winner;selections=value.finalists.map(x=>`${x===value.winner?'★':'○'} ${x.label}`);}
+    else if(mode.kind==='tournament'){const value=tournament(pairs);candidate=value.winner;selections=value.rounds.map((round,i)=>`Round ${i+1}: ${round.map(match=>match.winner.label).join(' · ')}`);}
     else if(mode.kind==='cascade'){
       const tree=groups.map(g=>({...g,children:g.options?.map(o=>({...o,group:g,option:o}))})); const path=cascade(tree); candidate=path.at(-1); selections=path.map(x=>x.label);
     } else if(mode.kind==='slots'){
@@ -82,8 +82,30 @@ function Mechanic({ mode, groups, pairs, onResult, reducedMotion, disabled }) {
     setPlaying(true); setDisplay(selections); // outcome is fixed before visual animation begins
     clearTimeout(timer.current); timer.current=setTimeout(()=>{setRecord(value);setPlaying(false);onResult(value)},reducedMotion?0:700);
   };
+  return <><ModeVisual mode={mode} display={display} playing={playing}/><div className="spin-controls"><button className="primary" onClick={play} disabled={disabled||playing||!pairs.length}>Play {mode.name}</button></div><Result record={record}/></>;
+}
+
+function ModeVisual({mode,display,playing}) {
   const glyph=mode.id==='dice'?'⚄':mode.id==='cards'?'🂠':mode.id==='raffle'?'🎟':mode.icon;
-  return <><div className={`mechanic mechanic-${mode.kind} ${playing?'playing':''}`} data-testid={`${mode.id}-visual`} aria-hidden="true"><strong>{glyph}</strong><div>{display.map((x,i)=><span key={`${x}-${i}`}>{x}</span>)}</div></div><div className="spin-controls"><button className="primary" onClick={play} disabled={disabled||playing||!pairs.length}>{mode.status==='preview'?`Run ${mode.name} preview`:`Play ${mode.name}`}</button></div><Result record={record}/></>;
+  const special=['plinko','pachinko','skeeball','darts','marbles','slots','dice','cards','raffle'].includes(mode.kind);
+  return <div className={`mechanic mechanic-${mode.kind} ${playing?'playing':''}`} data-testid={`${mode.id}-visual`} aria-label={`${mode.name} animation`}>
+    {(mode.kind==='plinko'||mode.kind==='pachinko')&&<div className={`peg-board ${mode.kind}`}><div className="peg-grid">{Array.from({length:22},(_,i)=><i key={i}/>)}</div><b>●</b><footer><span/><span/><span/><span/></footer></div>}
+    {mode.kind==='skeeball'&&<div className="skee-machine"><div className="score-rings"><i>100</i><i>50</i><i>25</i></div><div className="skee-lane"><b>●</b></div></div>}
+    {mode.kind==='darts'&&<div className="dart-cabinet"><div className="dart-target"><b>➳</b></div><small>WHEELIN' DARTS</small></div>}
+    {mode.kind==='marbles'&&<div className="race-track">{[0,1,2].map(i=><div key={i}><em>Lane {i+1}</em><i>●</i><b>⚑</b></div>)}</div>}
+    {mode.kind==='slots'&&<div className="slot-machine"><header>LUCKY PICK</header><div>{[display[0]||'GROUP',display[1]||'OPTION'].map((x,i)=><span key={i}>{x}</span>)}</div><b>●</b></div>}
+    {mode.kind==='dice'&&<div className="dice-table"><strong>{glyph}</strong><i/><i/></div>}
+    {mode.kind==='cards'&&<div className="card-table"><i/><i/><strong>{glyph}</strong></div>}
+    {mode.kind==='raffle'&&<div className="raffle-drum"><span>● ● ●</span><strong>{glyph}</strong></div>}
+    {!special&&<strong>{glyph}</strong>}
+    {mode.kind!=='slots'&&<VisualResults kind={mode.kind} display={display}/>}
+  </div>;
+}
+
+function VisualResults({kind,display}) {
+  if(!display.length)return <div className="mechanic-empty">Press play to set everything in motion</div>;
+  const label=kind==='tournament'?'BRACKET':kind==='knockout'?'ELIMINATION BOARD':kind==='playoffs'?'FINALISTS':kind==='ranked'?'PODIUM':kind==='cascade'?'DECISION PATH':'RESULT';
+  return <section className={`mechanic-results results-${kind}`}><small>{label}</small><div>{display.map((x,i)=><span key={`${x}-${i}`} data-place={i+1}>{x}</span>)}</div></section>;
 }
 
 function Nested({ groups, pairs, onResult, reducedMotion, disabled, mode }) {

@@ -25,36 +25,13 @@ The labels are examples, not a restriction: rename groups to households, meal ty
 
 ## Spin modes
 
-Mode status has one of three explicit meanings:
+All eighteen formats are implemented and selectable from the gallery. They use the same editable configuration and choose their result before animation begins.
 
-- **Implemented** (`implemented`) means a complete, interactive mechanic that simulates the named format.
-- **Interactive preview** (`preview`) means a simplified interactive visualization that chooses a valid result, but does not yet fully simulate the named mechanic.
-- **Concept** (`concept`) is reserved for a noninteractive design card with no play action.
+- **Wheel formats:** sequential, linked, nested, and one giant flattened wheel.
+- **Multi-round formats:** tournament brackets, group playoffs, knockout elimination, ranked results, and cascading paths show their intermediate selections.
+- **Physical formats:** Plinko, skee-ball, pachinko, marble racing, darts, dice, cards, raffle, and slot reels each use a recognizable, responsive game board or object with mode-specific motion.
 
-The source currently contains three specialized, implemented mechanics: the sequential two-wheel flow, nested rings, and a giant flattened wheel. All other entries use the generic preview component, which preselects a result using the format's selection routine and then animates a glyph and selection summary. No current entry is concept-only.
-
-| Mode | Source status | Rendered behavior |
-| --- | --- | --- |
-| Sequential wheels | Implemented | Specialized two-stage wheel: spin a group, then an option belonging to it; **Spin both** chains the stages. |
-| Linked wheels | Interactive preview | Generic preview preselects a related group and option and displays them in sequence; it does not render or spin two linked wheels. |
-| Nested wheels | Implemented | Specialized outer and inner wheel mechanic; the group result populates and starts the option ring. |
-| Giant wheel | Implemented | Specialized wheel containing every eligible group/option pair. |
-| Tournament | Interactive preview | Generic preview computes bracket winners and summarizes each round; no bracket is rendered. |
-| Slot reels | Interactive preview | Generic preview selects a related group and option and lists both; no reels are simulated. |
-| Cascading choices | Interactive preview | Generic preview samples the available group-to-option path; it is not an arbitrary interactive decision tree. |
-| Group playoffs | Interactive preview | Generic preview samples one finalist per group and a winner, then summarizes the finalists; no playoff interface is rendered. |
-| Knockout | Interactive preview | Generic preview computes eliminations and shows their labels; it does not play rounds interactively. |
-| Ranked pointers | Interactive preview | Generic preview samples up to three unique choices and lists their rank order; no pointers are rendered. |
-| Plinko | Interactive preview | Generic preview preselects a choice and animates the mode glyph; there are no pins or puck physics. |
-| Skee-ball | Interactive preview | Generic preview preselects a choice and animates the mode glyph; there is no roll or target simulation. |
-| Pachinko | Interactive preview | Generic preview preselects a choice and animates the mode glyph; there are no peg or ball physics. |
-| Marble racing | Interactive preview | Generic preview preselects a choice and animates the mode glyph; no race is simulated. |
-| Dice | Interactive preview | Generic preview preselects a choice and animates a die glyph; it does not map or roll custom faces. |
-| Cards | Interactive preview | Generic preview preselects a choice and animates a card glyph; it does not simulate a shuffled deck. |
-| Raffle | Interactive preview | Generic preview preselects a choice and animates a ticket glyph; it does not simulate a ticket pool. |
-| Darts | Interactive preview | Generic preview preselects a choice and animates the mode glyph; no board regions or throw are simulated. |
-
-Interactive selections honor configured relative weights. Wheel segment areas also represent relative weights, with a text legend so even very small segments remain legible.
+Every mode honors configured relative weights. Wheel segment areas also represent relative weights, with a text legend so even very small segments remain legible.
 
 ## Editing and local storage
 
